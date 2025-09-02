@@ -39,7 +39,6 @@ def load_settings_from_sheets(client, sheet_name):
         settings_raw = sheet.get_all_records()
         settings = {item['Setting']: item['Value'] for item in settings_raw}
         
-        # 키워드는 쉼표로 분리하여 리스트로 변환
         keywords = [k.strip() for k in settings.get('Keywords (comma-separated)', '').split(',')]
         receiver_email = settings.get('Receiver Email')
 
@@ -79,21 +78,20 @@ def save_announcements_to_sheet(client, sheet_name, announcements):
         sheet = client.open(sheet_name).worksheet("Collected_Announcements")
         rows_to_add = []
         
-        # [수정] 한국 시간대(KST, UTC+9)를 정의하고 현재 시간을 한 번만 가져옵니다.
         kst = timezone(timedelta(hours=9))
         collected_time_kst = datetime.now(kst).strftime('%Y-%m-%d %H:%M:%S')
 
         for ann in announcements:
-            # 날짜, 회사, 제목, 링크 순서로 리스트 생성
+            # [수정] 수집일, 회사, 제목, 공고일, 링크 순서로 리스트 생성
             row = [
-                collected_time_kst, # 모든 공고에 동일한 KST 수집 시간 적용
+                collected_time_kst,
                 ann['company'],
                 ann['title'],
+                ann.get('date', 'N/A'),  # 공고일 추가
                 ann['href']
             ]
             rows_to_add.append(row)
         
-        # 여러 행을 한 번에 추가하여 API 호출 최소화
         sheet.append_rows(rows_to_add)
         print("✅ Google Sheets에 신규 공고 저장 완료.")
     except gspread.exceptions.WorksheetNotFound:
@@ -101,7 +99,7 @@ def save_announcements_to_sheet(client, sheet_name, announcements):
     except Exception as e:
         print(f"❌ Google Sheets 저장 중 오류 발생: {e}")
 
-# --- 3. 크롤러 핵심 함수들 (이전과 동일) ---
+# --- 3. 크롤러 핵심 함수들 ---
 def send_email(subject, body, receiver_email):
     print("\n--- 이메일 발송 시도 ---")
     try:
@@ -134,10 +132,12 @@ def save_processed_link(link):
     with open(PROCESSED_LINKS_FILE, 'a', encoding='utf-8') as f: f.write(link + '\n')
 
 def generate_summary_email_body(announcements):
-    # [수정] 이메일 본문에도 KST 시간을 적용합니다.
     kst = timezone(timedelta(hours=9))
-    html = """<head><style>body{font-family:sans-serif}.container{border:1px solid #ddd;padding:20px;margin:20px;border-radius:8px}h2{color:#005aab}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:12px;text-align:left}th{background-color:#f2f2f2}a{color:#005aab;text-decoration:none}a:hover{text-decoration:underline}.footer{margin-top:20px;font-size:12px;color:#888}</style></head><body><div class="container"><h2>📢 신규 입찰 공고 요약</h2><p><strong>""" + datetime.now(kst).strftime('%Y년 %m월 %d일') + """</strong>에 발견된 신규 공고 목록입니다.</p><table><thead><tr><th>회사명</th><th>공고 제목</th></tr></thead><tbody>"""
-    for ann in announcements: html += f"""<tr><td>{ann['company']}</td><td><a href="{ann['href']}">{ann['title']}</a></td></tr>"""
+    # [수정] 이메일 테이블 헤더에 '공고일' 추가
+    html = """<head><style>body{font-family:sans-serif}.container{border:1px solid #ddd;padding:20px;margin:20px;border-radius:8px}h2{color:#005aab}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:12px;text-align:left}th{background-color:#f2f2f2}a{color:#005aab;text-decoration:none}a:hover{text-decoration:underline}.footer{margin-top:20px;font-size:12px;color:#888}</style></head><body><div class="container"><h2>📢 신규 입찰 공고 요약</h2><p><strong>""" + datetime.now(kst).strftime('%Y년 %m월 %d일') + """</strong>에 발견된 신규 공고 목록입니다.</p><table><thead><tr><th>회사명</th><th>공고일</th><th>공고 제목</th></tr></thead><tbody>"""
+    for ann in announcements:
+        # [수정] 이메일 테이블 행에 공고일 데이터 추가
+        html += f"""<tr><td>{ann['company']}</td><td>{ann.get('date', 'N/A')}</td><td><a href="{ann['href']}">{ann['title']}</a></td></tr>"""
     html += """</tbody></table><p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p></div></body>"""
     return html
 
@@ -157,12 +157,28 @@ def crawl_site(target, keywords, processed_links):
     for link in links:
         title = link.get_text(strip=True)
         href = link.get('href', '')
+        
+        # [수정] 공고일(post_date)을 크롤링하는 로직 추가
+        post_date = "N/A"
+        try:
+            # 링크(a) 태그의 부모인 tr 태그를 찾고, 그 안에서 class가 'date'인 td를 찾습니다.
+            parent_row = link.find_parent('tr')
+            if parent_row:
+                date_cell = parent_row.find('td', class_='date')
+                if date_cell:
+                    post_date = date_cell.get_text(strip=True)
+        except Exception:
+            pass # 날짜를 찾지 못해도 오류 없이 진행
+
         if href and not href.startswith('http'): href = base_url.rstrip('/') + '/' + href.lstrip('/')
         if any(keyword.lower() in title.lower() for keyword in keywords) and href and href not in processed_links:
-            print(f"🚀 새로운 공고 발견: [{company}] {title}")
-            new_announcements.append({"company": company, "title": title, "href": href})
+            # [수정] 로그에 공고일 추가
+            print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
+            # [수정] 수집 데이터에 공고일 추가
+            new_announcements.append({"company": company, "title": title, "href": href, "date": post_date})
             save_processed_link(href)
             processed_links.add(href)
+            
     if not new_announcements: print(f"ℹ️ '{company}'에서 키워드에 맞는 새로운 공고를 찾지 못했습니다.")
     return new_announcements
 
@@ -170,7 +186,6 @@ def crawl_site(target, keywords, processed_links):
 def main():
     print("="*50 + "\nGoogle Sheets 연동 입찰 공고 크롤러 (v2)를 시작합니다.\n" + "="*50)
     
-    # [★★ 중요 ★★] 여기에 본인의 Google Sheet 파일 이름을 정확히 입력하세요.
     google_sheet_filename = "마케팅 공고 크롤러"
 
     client = get_gspread_client()
@@ -196,10 +211,7 @@ def main():
     print("\n--- 모든 사이트 크롤링 완료 ---")
 
     if all_new_announcements:
-        # 1. Google Sheets에 결과 저장
         save_announcements_to_sheet(client, google_sheet_filename, all_new_announcements)
-
-        # 2. 이메일 발송
         count = len(all_new_announcements)
         print(f"\n총 {count}개의 신규 공고를 발견하여 요약 이메일을 발송합니다.")
         subject = f"[입찰 공고] {count}개의 신규 공고가 있습니다."
