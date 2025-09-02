@@ -10,23 +10,28 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    # [수정] 스크립트가 processed_links.txt 파일을 다시 커밋(쓰기)할 수 있도록 권한을 부여합니다.
+    permissions:
+      contents: write
+
     steps:
       # 1. 리포지토리의 코드를 가상 환경으로 가져옵니다.
       - name: Checkout repository
         uses: actions/checkout@v3
-
+        
       # 2. 파이썬 3.10 버전을 설치합니다.
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
+          
       # 3. requirements.txt에 명시된 라이브러리들을 설치합니다.
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      
+          
       # 4. 파이썬 스크립트를 실행합니다.
       - name: Run Python script
         env:
