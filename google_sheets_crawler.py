@@ -82,12 +82,11 @@ def save_announcements_to_sheet(client, sheet_name, announcements):
         collected_time_kst = datetime.now(kst).strftime('%Y-%m-%d %H:%M:%S')
 
         for ann in announcements:
-            # [수정] 수집일, 회사, 제목, 공고일, 링크 순서로 리스트 생성
             row = [
                 collected_time_kst,
                 ann['company'],
                 ann['title'],
-                ann.get('date', 'N/A'),  # 공고일 추가
+                ann.get('date', 'N/A'),
                 ann['href']
             ]
             rows_to_add.append(row)
@@ -133,60 +132,79 @@ def save_processed_link(link):
 
 def generate_summary_email_body(announcements):
     kst = timezone(timedelta(hours=9))
-    # [수정] 이메일 테이블 헤더에 '공고일' 추가
     html = """<head><style>body{font-family:sans-serif}.container{border:1px solid #ddd;padding:20px;margin:20px;border-radius:8px}h2{color:#005aab}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:12px;text-align:left}th{background-color:#f2f2f2}a{color:#005aab;text-decoration:none}a:hover{text-decoration:underline}.footer{margin-top:20px;font-size:12px;color:#888}</style></head><body><div class="container"><h2>📢 신규 입찰 공고 요약</h2><p><strong>""" + datetime.now(kst).strftime('%Y년 %m월 %d일') + """</strong>에 발견된 신규 공고 목록입니다.</p><table><thead><tr><th>회사명</th><th>공고일</th><th>공고 제목</th></tr></thead><tbody>"""
     for ann in announcements:
-        # [수정] 이메일 테이블 행에 공고일 데이터 추가
         html += f"""<tr><td>{ann['company']}</td><td>{ann.get('date', 'N/A')}</td><td><a href="{ann['href']}">{ann['title']}</a></td></tr>"""
     html += """</tbody></table><p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p></div></body>"""
     return html
 
 def crawl_site(target, keywords, processed_links):
-    company, url, selector, base_url = target.get('company','N/A'), target.get('url'), target.get('selector'), target.get('base_url','')
+    # [수정] 개별 selector들을 시트에서 가져옵니다.
+    company = target.get('company','N/A')
+    url = target.get('url')
+    base_url = target.get('base_url','')
+    item_selector = target.get('item_selector')
+    title_link_selector = target.get('title_link_selector')
+    date_selector = target.get('date_selector') # 비어있을 수 있음
+
     new_announcements = []
-    if not all([url, selector]): print(f"🟡 경고: '{company}'의 url 또는 selector가 비어있어 건너뜁니다."); return new_announcements
+    
+    # [수정] 필수 selector들이 있는지 확인합니다.
+    if not all([url, item_selector, title_link_selector]):
+        print(f"🟡 경고: '{company}'의 url, item_selector 또는 title_link_selector가 비어있어 건너뜁니다.")
+        return new_announcements
+
     print(f"\n--- '{company}' 사이트 크롤링 시작 ---")
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
-    except requests.RequestException as e: print(f"❌ '{company}' 사이트 접속 실패: {e}"); return new_announcements
-    soup = BeautifulSoup(response.text, 'html.parser')
-    links = soup.select(selector)
-    if not links: print(f"🟡 경고: '{company}'에서 '{selector}' 선택자에 해당하는 링크를 찾지 못했습니다."); return new_announcements
-    for link in links:
-        title = link.get_text(strip=True)
-        href = link.get('href', '')
-        
-        # [수정] 공고일(post_date)을 크롤링하는 로직 추가
-        post_date = "N/A"
-        try:
-            # 링크(a) 태그의 부모인 tr 태그를 찾고, 그 안에서 class가 'date'인 td를 찾습니다.
-            parent_row = link.find_parent('tr')
-            if parent_row:
-                date_cell = parent_row.find('td', class_='date')
-                if date_cell:
-                    post_date = date_cell.get_text(strip=True)
-        except Exception:
-            pass # 날짜를 찾지 못해도 오류 없이 진행
+    except requests.RequestException as e:
+        print(f"❌ '{company}' 사이트 접속 실패: {e}")
+        return new_announcements
 
-        if href and not href.startswith('http'): href = base_url.rstrip('/') + '/' + href.lstrip('/')
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    # [수정] 1. item_selector로 각 공고의 부모 요소를 찾습니다.
+    items = soup.select(item_selector)
+    if not items:
+        print(f"🟡 경고: '{company}'에서 '{item_selector}' 선택자에 해당하는 항목을 찾지 못했습니다.")
+        return new_announcements
+
+    # [수정] 2. 각 부모 요소 안에서 세부 정보를 찾습니다.
+    for item in items:
+        title_link_element = item.select_one(title_link_selector)
+        
+        if not title_link_element:
+            continue # 이 항목에서는 제목/링크를 찾지 못했으므로 다음 항목으로 넘어갑니다.
+
+        title = title_link_element.get_text(strip=True)
+        href = title_link_element.get('href', '')
+        
+        post_date = "N/A"
+        if date_selector: # date_selector가 시트에 입력된 경우에만 날짜를 찾습니다.
+            date_element = item.select_one(date_selector)
+            if date_element:
+                post_date = date_element.get_text(strip=True)
+
+        if href and not href.startswith('http'):
+            href = base_url.rstrip('/') + '/' + href.lstrip('/')
+            
         if any(keyword.lower() in title.lower() for keyword in keywords) and href and href not in processed_links:
-            # [수정] 로그에 공고일 추가
             print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
-            # [수정] 수집 데이터에 공고일 추가
             new_announcements.append({"company": company, "title": title, "href": href, "date": post_date})
             save_processed_link(href)
             processed_links.add(href)
             
-    if not new_announcements: print(f"ℹ️ '{company}'에서 키워드에 맞는 새로운 공고를 찾지 못했습니다.")
+    if not new_announcements:
+        print(f"ℹ️ '{company}'에서 키워드에 맞는 새로운 공고를 찾지 못했습니다.")
     return new_announcements
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    print("="*50 + "\nGoogle Sheets 연동 입찰 공고 크롤러 (v2)를 시작합니다.\n" + "="*50)
+    print("="*50 + "\nGoogle Sheets 연동 입찰 공고 크롤러 (v3-flexible)를 시작합니다.\n" + "="*50)
     
-    google_sheet_filename = "마케팅 공고 크롤러"
+    google_sheet_filename = "나의 크롤러 설정 시트"
 
     client = get_gspread_client()
     if not client:
