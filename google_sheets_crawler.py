@@ -204,7 +204,7 @@ def crawl_site(target, keywords, processed_links):
 def main():
     print("="*50 + "\nGoogle Sheets 연동 입찰 공고 크롤러 (v3-flexible)를 시작합니다.\n" + "="*50)
     
-    google_sheet_filename = "나의 크롤러 설정 시트"
+    google_sheet_filename = "마케팅 공고 크롤러"
 
     client = get_gspread_client()
     if not client:
