@@ -15,43 +15,92 @@ from oauth2client.service_account import ServiceAccountCredentials
 # --- 1. 설정 및 전역 변수 ---
 PROCESSED_LINKS_FILE = 'processed_links.txt'
 
-# --- 2. Google Sheets 인증 및 데이터 로드 ---
-def load_targets_from_sheets():
-    """Google Sheets에서 크롤링 대상을 불러옵니다."""
-    print("--- Google Sheets에서 크롤링 대상 로드 시작 ---")
+# --- 2. Google Sheets 연동 함수들 ---
+def get_gspread_client():
+    """gspread 클라이언트를 인증하고 반환합니다."""
     try:
-        # GitHub Secret에서 JSON 인증 정보를 가져옵니다.
         creds_json_str = os.environ.get('GOOGLE_API_CREDENTIALS')
         if not creds_json_str:
             print("❌ GOOGLE_API_CREDENTIALS Secret이 설정되지 않았습니다.")
-            return []
-            
+            return None
         creds_dict = json.loads(creds_json_str)
-        
         scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
         client = gspread.authorize(creds)
-        
-        # [★★ 중요 ★★] 여기에 본인의 Google Sheet 파일 이름을 정확히 입력하세요.
-        sheet_name = "마케팅 공고 크롤러" 
-        sheet = client.open(sheet_name).sheet1
-        
-        records = sheet.get_all_records()
-        print(f"✅ Google Sheets에서 {len(records)}개의 크롤링 대상을 불러왔습니다.")
-        return records
-
+        return client
     except Exception as e:
-        print(f"❌ Google Sheets 연동 실패: {e}")
-        print("   (API 권한, 시트 공유, 시트 이름 등을 확인해주세요.)")
+        print(f"❌ Google Sheets 클라이언트 인증 실패: {e}")
+        return None
+
+def load_settings_from_sheets(client, sheet_name):
+    """'Settings' 시트에서 설정을 불러옵니다."""
+    try:
+        sheet = client.open(sheet_name).worksheet("Settings")
+        settings_raw = sheet.get_all_records()
+        settings = {item['Setting']: item['Value'] for item in settings_raw}
+        
+        # 키워드는 쉼표로 분리하여 리스트로 변환
+        keywords = [k.strip() for k in settings.get('Keywords (comma-separated)', '').split(',')]
+        receiver_email = settings.get('Receiver Email')
+
+        if not receiver_email or not keywords:
+            print("❌ 'Settings' 시트에 'Receiver Email' 또는 'Keywords' 설정이 없습니다.")
+            return None, None
+
+        print("✅ 'Settings' 시트 로드 성공.")
+        return keywords, receiver_email
+    except gspread.exceptions.WorksheetNotFound:
+        print(f"❌ '{sheet_name}' 파일에 'Settings' 시트가 없습니다.")
+        return None, None
+    except Exception as e:
+        print(f"❌ 'Settings' 시트 로드 중 오류 발생: {e}")
+        return None, None
+
+def load_targets_from_sheets(client, sheet_name):
+    """'Crawl_Targets' 시트에서 크롤링 대상을 불러옵니다."""
+    try:
+        sheet = client.open(sheet_name).worksheet("Crawl_Targets")
+        records = sheet.get_all_records()
+        print(f"✅ 'Crawl_Targets' 시트에서 {len(records)}개의 대상을 불러왔습니다.")
+        return records
+    except gspread.exceptions.WorksheetNotFound:
+        print(f"❌ '{sheet_name}' 파일에 'Crawl_Targets' 시트가 없습니다.")
+        return []
+    except Exception as e:
+        print(f"❌ 'Crawl_Targets' 시트 로드 중 오류 발생: {e}")
         return []
 
-# --- 3. 크롤러 핵심 함수들 ---
+def save_announcements_to_sheet(client, sheet_name, announcements):
+    """'Collected_Announcements' 시트에 새로운 공고를 저장합니다."""
+    if not announcements:
+        return
+    print(f"\n--- Google Sheets에 {len(announcements)}개의 신규 공고 저장 시도 ---")
+    try:
+        sheet = client.open(sheet_name).worksheet("Collected_Announcements")
+        rows_to_add = []
+        for ann in announcements:
+            # 날짜, 회사, 제목, 링크 순서로 리스트 생성
+            row = [
+                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                ann['company'],
+                ann['title'],
+                ann['href']
+            ]
+            rows_to_add.append(row)
+        
+        # 여러 행을 한 번에 추가하여 API 호출 최소화
+        sheet.append_rows(rows_to_add)
+        print("✅ Google Sheets에 신규 공고 저장 완료.")
+    except gspread.exceptions.WorksheetNotFound:
+        print(f"❌ '{sheet_name}' 파일에 'Collected_Announcements' 시트가 없습니다.")
+    except Exception as e:
+        print(f"❌ Google Sheets 저장 중 오류 발생: {e}")
 
+# --- 3. 크롤러 핵심 함수들 (이전과 동일) ---
+# (send_email, load_processed_links, save_processed_link, generate_summary_email_body, crawl_site 함수는 이전 버전과 동일)
 def send_email(subject, body, receiver_email):
-    """요약된 이메일을 발송하는 함수."""
     print("\n--- 이메일 발송 시도 ---")
     try:
-        # GitHub Secrets에서 이메일 정보를 가져옵니다.
         smtp_user = os.environ.get('GMAIL_USER')
         smtp_password = os.environ.get('GMAIL_PASSWORD')
         if not smtp_user or not smtp_password:
@@ -60,12 +109,10 @@ def send_email(subject, body, receiver_email):
     except Exception as e:
         print(f"❌ GitHub Secrets 로드 실패: {e}")
         return
-
     msg = MIMEText(body, 'html', 'utf-8')
     msg['Subject'] = Header(subject, 'utf-8')
     msg['From'] = smtp_user
     msg['To'] = receiver_email
-
     try:
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
@@ -74,104 +121,59 @@ def send_email(subject, body, receiver_email):
         print(f"✅ 이메일 발송 성공: {subject}")
     except Exception as e:
         print(f"❌ 이메일 발송 실패: {e}")
-
 def load_processed_links():
-    """이미 처리된 링크 목록을 파일에서 불러옵니다."""
-    if not os.path.exists(PROCESSED_LINKS_FILE):
-        return set()
-    with open(PROCESSED_LINKS_FILE, 'r', encoding='utf-8') as f:
-        return set(line.strip() for line in f)
-
+    if not os.path.exists(PROCESSED_LINKS_FILE): return set()
+    with open(PROCESSED_LINKS_FILE, 'r', encoding='utf-8') as f: return set(line.strip() for line in f)
 def save_processed_link(link):
-    """새롭게 처리된 링크를 파일에 추가합니다."""
-    with open(PROCESSED_LINKS_FILE, 'a', encoding='utf-8') as f:
-        f.write(link + '\n')
-
+    with open(PROCESSED_LINKS_FILE, 'a', encoding='utf-8') as f: f.write(link + '\n')
 def generate_summary_email_body(announcements):
-    """공고 리스트를 받아 HTML 이메일 본문을 생성합니다."""
-    html = """
-    <head>
-        <style>
-            body { font-family: 'Malgun Gothic', sans-serif; } .container { border: 1px solid #ddd; padding: 20px; margin: 20px; border-radius: 8px; } h2 { color: #005AAB; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ddd; padding: 12px; text-align: left; } th { background-color: #f2f2f2; } a { color: #005AAB; text-decoration: none; } a:hover { text-decoration: underline; } .footer { margin-top: 20px; font-size: 12px; color: #888; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h2>📢 신규 입찰 공고 요약</h2>
-            <p><strong>""" + datetime.now().strftime('%Y년 %m월 %d일') + """</strong>에 발견된 신규 공고 목록입니다.</p>
-            <table><thead><tr><th>회사명</th><th>공고 제목</th></tr></thead><tbody>
-    """
-    for ann in announcements:
-        html += f"""<tr><td>{ann['company']}</td><td><a href="{ann['href']}">{ann['title']}</a></td></tr>"""
-    html += """
-            </tbody></table>
-            <p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p>
-        </div>
-    </body>
-    """
+    html = """<head><style>body{font-family:sans-serif}.container{border:1px solid #ddd;padding:20px;margin:20px;border-radius:8px}h2{color:#005aab}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:12px;text-align:left}th{background-color:#f2f2f2}a{color:#005aab;text-decoration:none}a:hover{text-decoration:underline}.footer{margin-top:20px;font-size:12px;color:#888}</style></head><body><div class="container"><h2>📢 신규 입찰 공고 요약</h2><p><strong>""" + datetime.now().strftime('%Y년 %m월 %d일') + """</strong>에 발견된 신규 공고 목록입니다.</p><table><thead><tr><th>회사명</th><th>공고 제목</th></tr></thead><tbody>"""
+    for ann in announcements: html += f"""<tr><td>{ann['company']}</td><td><a href="{ann['href']}">{ann['title']}</a></td></tr>"""
+    html += """</tbody></table><p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p></div></body>"""
     return html
-
 def crawl_site(target, keywords, processed_links):
-    """사이트를 크롤링하여 새로운 공고 리스트를 반환합니다."""
-    company = target.get('company', 'N/A')
-    url = target.get('url')
-    selector = target.get('selector')
-    base_url = target.get('base_url', '')
+    company, url, selector, base_url = target.get('company','N/A'), target.get('url'), target.get('selector'), target.get('base_url','')
     new_announcements = []
-
-    if not all([url, selector]):
-        print(f"🟡 경고: '{company}'의 url 또는 selector가 비어있어 건너뜁니다.")
-        return new_announcements
-        
+    if not all([url, selector]): print(f"🟡 경고: '{company}'의 url 또는 selector가 비어있어 건너뜁니다."); return new_announcements
     print(f"\n--- '{company}' 사이트 크롤링 시작 ---")
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
-    except requests.RequestException as e:
-        print(f"❌ '{company}' 사이트 접속 실패: {e}")
-        return new_announcements
-
+    except requests.RequestException as e: print(f"❌ '{company}' 사이트 접속 실패: {e}"); return new_announcements
     soup = BeautifulSoup(response.text, 'html.parser')
     links = soup.select(selector)
-
-    if not links:
-        print(f"🟡 경고: '{company}'에서 '{selector}' 선택자에 해당하는 링크를 찾지 못했습니다.")
-        return new_announcements
-
+    if not links: print(f"🟡 경고: '{company}'에서 '{selector}' 선택자에 해당하는 링크를 찾지 못했습니다."); return new_announcements
     for link in links:
         title = link.get_text(strip=True)
         href = link.get('href', '')
-
-        if href and not href.startswith('http'):
-            href = base_url.rstrip('/') + '/' + href.lstrip('/')
-
+        if href and not href.startswith('http'): href = base_url.rstrip('/') + '/' + href.lstrip('/')
         if any(keyword.lower() in title.lower() for keyword in keywords) and href and href not in processed_links:
             print(f"🚀 새로운 공고 발견: [{company}] {title}")
             new_announcements.append({"company": company, "title": title, "href": href})
             save_processed_link(href)
             processed_links.add(href)
-    
-    if not new_announcements:
-        print(f"ℹ️ '{company}'에서 키워드에 맞는 새로운 공고를 찾지 못했습니다.")
+    if not new_announcements: print(f"ℹ️ '{company}'에서 키워드에 맞는 새로운 공고를 찾지 못했습니다.")
     return new_announcements
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    """스크립트의 메인 실행 함수입니다."""
-    print("="*50)
-    print("Google Sheets 연동 입찰 공고 크롤러를 시작합니다.")
-    print("="*50)
+    print("="*50 + "\nGoogle Sheets 연동 입찰 공고 크롤러 (v2)를 시작합니다.\n" + "="*50)
     
-    targets = load_targets_from_sheets()
-    if not targets:
-        print("크롤링 대상이 없어 작업을 종료합니다.")
+    # [★★ 중요 ★★] 여기에 본인의 Google Sheet 파일 이름을 정확히 입력하세요.
+    google_sheet_filename = "마케팅 공고 크롤러"
+
+    client = get_gspread_client()
+    if not client:
         return
 
-    # [★★ 중요 ★★] 아래 키워드와 이메일 주소를 원하는 값으로 수정하세요.
-    keywords_to_find = ["대행사", "입찰", "선정", "공고", "모집", "마케팅"]
-    email_to_receive = "gooodong3@gmail.com"
+    keywords_to_find, email_to_receive = load_settings_from_sheets(client, google_sheet_filename)
+    targets = load_targets_from_sheets(client, google_sheet_filename)
     
+    if not targets or not keywords_to_find or not email_to_receive:
+        print("크롤링에 필요한 설정 정보가 부족하여 작업을 종료합니다.")
+        return
+        
     processed_links = load_processed_links()
     all_new_announcements = []
 
@@ -179,11 +181,15 @@ def main():
         new_finds = crawl_site(target, keywords_to_find, processed_links)
         if new_finds:
             all_new_announcements.extend(new_finds)
-        time.sleep(1) # 사이트 부하를 줄이기 위한 지연
+        time.sleep(1)
 
     print("\n--- 모든 사이트 크롤링 완료 ---")
 
     if all_new_announcements:
+        # 1. Google Sheets에 결과 저장
+        save_announcements_to_sheet(client, google_sheet_filename, all_new_announcements)
+
+        # 2. 이메일 발송
         count = len(all_new_announcements)
         print(f"\n총 {count}개의 신규 공고를 발견하여 요약 이메일을 발송합니다.")
         subject = f"[입찰 공고] {count}개의 신규 공고가 있습니다."
