@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from email.header import Header
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import json
 
 # Google Sheets 연동을 위한 라이브러리
@@ -78,10 +78,15 @@ def save_announcements_to_sheet(client, sheet_name, announcements):
     try:
         sheet = client.open(sheet_name).worksheet("Collected_Announcements")
         rows_to_add = []
+        
+        # [수정] 한국 시간대(KST, UTC+9)를 정의하고 현재 시간을 한 번만 가져옵니다.
+        kst = timezone(timedelta(hours=9))
+        collected_time_kst = datetime.now(kst).strftime('%Y-%m-%d %H:%M:%S')
+
         for ann in announcements:
             # 날짜, 회사, 제목, 링크 순서로 리스트 생성
             row = [
-                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                collected_time_kst, # 모든 공고에 동일한 KST 수집 시간 적용
                 ann['company'],
                 ann['title'],
                 ann['href']
@@ -97,7 +102,6 @@ def save_announcements_to_sheet(client, sheet_name, announcements):
         print(f"❌ Google Sheets 저장 중 오류 발생: {e}")
 
 # --- 3. 크롤러 핵심 함수들 (이전과 동일) ---
-# (send_email, load_processed_links, save_processed_link, generate_summary_email_body, crawl_site 함수는 이전 버전과 동일)
 def send_email(subject, body, receiver_email):
     print("\n--- 이메일 발송 시도 ---")
     try:
@@ -121,16 +125,22 @@ def send_email(subject, body, receiver_email):
         print(f"✅ 이메일 발송 성공: {subject}")
     except Exception as e:
         print(f"❌ 이메일 발송 실패: {e}")
+
 def load_processed_links():
     if not os.path.exists(PROCESSED_LINKS_FILE): return set()
     with open(PROCESSED_LINKS_FILE, 'r', encoding='utf-8') as f: return set(line.strip() for line in f)
+
 def save_processed_link(link):
     with open(PROCESSED_LINKS_FILE, 'a', encoding='utf-8') as f: f.write(link + '\n')
+
 def generate_summary_email_body(announcements):
-    html = """<head><style>body{font-family:sans-serif}.container{border:1px solid #ddd;padding:20px;margin:20px;border-radius:8px}h2{color:#005aab}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:12px;text-align:left}th{background-color:#f2f2f2}a{color:#005aab;text-decoration:none}a:hover{text-decoration:underline}.footer{margin-top:20px;font-size:12px;color:#888}</style></head><body><div class="container"><h2>📢 신규 입찰 공고 요약</h2><p><strong>""" + datetime.now().strftime('%Y년 %m월 %d일') + """</strong>에 발견된 신규 공고 목록입니다.</p><table><thead><tr><th>회사명</th><th>공고 제목</th></tr></thead><tbody>"""
+    # [수정] 이메일 본문에도 KST 시간을 적용합니다.
+    kst = timezone(timedelta(hours=9))
+    html = """<head><style>body{font-family:sans-serif}.container{border:1px solid #ddd;padding:20px;margin:20px;border-radius:8px}h2{color:#005aab}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:12px;text-align:left}th{background-color:#f2f2f2}a{color:#005aab;text-decoration:none}a:hover{text-decoration:underline}.footer{margin-top:20px;font-size:12px;color:#888}</style></head><body><div class="container"><h2>📢 신규 입찰 공고 요약</h2><p><strong>""" + datetime.now(kst).strftime('%Y년 %m월 %d일') + """</strong>에 발견된 신규 공고 목록입니다.</p><table><thead><tr><th>회사명</th><th>공고 제목</th></tr></thead><tbody>"""
     for ann in announcements: html += f"""<tr><td>{ann['company']}</td><td><a href="{ann['href']}">{ann['title']}</a></td></tr>"""
     html += """</tbody></table><p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p></div></body>"""
     return html
+
 def crawl_site(target, keywords, processed_links):
     company, url, selector, base_url = target.get('company','N/A'), target.get('url'), target.get('selector'), target.get('base_url','')
     new_announcements = []
