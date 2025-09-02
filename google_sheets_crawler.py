@@ -33,7 +33,7 @@ def load_targets_from_sheets():
         client = gspread.authorize(creds)
         
         # [★★ 중요 ★★] 여기에 본인의 Google Sheet 파일 이름을 정확히 입력하세요.
-        sheet_name = "나의 크롤러 설정 시트" 
+        sheet_name = "마케팅 공고 크롤러" 
         sheet = client.open(sheet_name).sheet1
         
         records = sheet.get_all_records()
