@@ -39,7 +39,7 @@ def load_settings_from_sheets(client, sheet_name):
         settings_raw = sheet.get_all_records()
         settings = {item['Setting']: item['Value'] for item in settings_raw}
         
-        keywords = [k.strip() for k in settings.get('Keywords (comma-separated)', '').split(',')]
+        keywords = [k.strip() for k in settings.get('Keywords (comma-separated)', '').split(',') if k.strip()]
         receiver_email = settings.get('Receiver Email')
 
         if not receiver_email or not keywords:
@@ -91,7 +91,8 @@ def save_announcements_to_sheet(client, sheet_name, announcements):
             ]
             rows_to_add.append(row)
         
-        sheet.append_rows(rows_to_add)
+        # 'USER_ENTERED' 옵션으로 셀 서식을 유지하며 데이터 추가
+        sheet.append_rows(rows_to_add, value_input_option='USER_ENTERED')
         print("✅ Google Sheets에 신규 공고 저장 완료.")
     except gspread.exceptions.WorksheetNotFound:
         print(f"❌ '{sheet_name}' 파일에 'Collected_Announcements' 시트가 없습니다.")
@@ -139,17 +140,15 @@ def generate_summary_email_body(announcements):
     return html
 
 def crawl_site(target, keywords, processed_links):
-    # [수정] 개별 selector들을 시트에서 가져옵니다.
     company = target.get('company','N/A')
     url = target.get('url')
     base_url = target.get('base_url','')
     item_selector = target.get('item_selector')
     title_link_selector = target.get('title_link_selector')
-    date_selector = target.get('date_selector') # 비어있을 수 있음
+    date_selector = target.get('date_selector', '')
 
     new_announcements = []
     
-    # [수정] 필수 selector들이 있는지 확인합니다.
     if not all([url, item_selector, title_link_selector]):
         print(f"🟡 경고: '{company}'의 url, item_selector 또는 title_link_selector가 비어있어 건너뜁니다.")
         return new_announcements
@@ -157,32 +156,29 @@ def crawl_site(target, keywords, processed_links):
     print(f"\n--- '{company}' 사이트 크롤링 시작 ---")
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=15)
         response.raise_for_status()
     except requests.RequestException as e:
         print(f"❌ '{company}' 사이트 접속 실패: {e}")
         return new_announcements
 
     soup = BeautifulSoup(response.text, 'html.parser')
-    
-    # [수정] 1. item_selector로 각 공고의 부모 요소를 찾습니다.
     items = soup.select(item_selector)
     if not items:
         print(f"🟡 경고: '{company}'에서 '{item_selector}' 선택자에 해당하는 항목을 찾지 못했습니다.")
         return new_announcements
 
-    # [수정] 2. 각 부모 요소 안에서 세부 정보를 찾습니다.
     for item in items:
         title_link_element = item.select_one(title_link_selector)
         
         if not title_link_element:
-            continue # 이 항목에서는 제목/링크를 찾지 못했으므로 다음 항목으로 넘어갑니다.
+            continue
 
         title = title_link_element.get_text(strip=True)
         href = title_link_element.get('href', '')
         
         post_date = "N/A"
-        if date_selector: # date_selector가 시트에 입력된 경우에만 날짜를 찾습니다.
+        if date_selector:
             date_element = item.select_one(date_selector)
             if date_element:
                 post_date = date_element.get_text(strip=True)
@@ -204,23 +200,23 @@ def crawl_site(target, keywords, processed_links):
 def main():
     print("="*50 + "\nGoogle Sheets 연동 입찰 공고 크롤러 (v3-flexible)를 시작합니다.\n" + "="*50)
     
-    google_sheet_filename = "마케팅 공고 크롤러"
+    google_sheet_filename = "나의 크롤러 설정 시트" # 여기에 실제 Google Sheet 파일 이름을 입력하세요.
 
     client = get_gspread_client()
-    if not client:
-        return
+    if not client: return
 
     keywords_to_find, email_to_receive = load_settings_from_sheets(client, google_sheet_filename)
     targets = load_targets_from_sheets(client, google_sheet_filename)
     
-    if not targets or not keywords_to_find or not email_to_receive:
-        print("크롤링에 필요한 설정 정보가 부족하여 작업을 종료합니다.")
+    if not all([targets, keywords_to_find, email_to_receive]):
+        print("크롤링에 필요한 설정 정보(대상, 키워드, 수신 이메일)가 부족하여 작업을 종료합니다.")
         return
         
     processed_links = load_processed_links()
     all_new_announcements = []
 
     for target in targets:
+        if not target.get('company'): continue
         new_finds = crawl_site(target, keywords_to_find, processed_links)
         if new_finds:
             all_new_announcements.extend(new_finds)
@@ -231,7 +227,6 @@ def main():
     if all_new_announcements:
         save_announcements_to_sheet(client, google_sheet_filename, all_new_announcements)
         count = len(all_new_announcements)
-        print(f"\n총 {count}개의 신규 공고를 발견하여 요약 이메일을 발송합니다.")
         subject = f"[입찰 공고] {count}개의 신규 공고가 있습니다."
         body = generate_summary_email_body(all_new_announcements)
         send_email(subject, body, email_to_receive)
