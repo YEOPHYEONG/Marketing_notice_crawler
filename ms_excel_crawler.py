@@ -71,6 +71,7 @@ def get_excel_data(access_token, sheet_name):
         return []
 
 def save_announcements_to_excel(access_token, announcements):
+    """[수정] 새로운 공고를 Excel 테이블의 맨 위에 삽입합니다."""
     if not announcements: return
     user_principal_name, excel_file_path = os.environ.get('MS_USER_PRINCIPAL_NAME'), os.environ.get('MS_EXCEL_FILE_PATH')
     sheet_name = "Collected_Announcements"
@@ -79,7 +80,10 @@ def save_announcements_to_excel(access_token, announcements):
     kst = timezone(timedelta(hours=9))
     collected_time_kst = datetime.now(kst).strftime('%Y-%m-%d %H:%M:%S')
     rows_to_add = [[collected_time_kst, ann['company'], ann['title'], ann.get('date', 'N/A'), ann['href']] for ann in announcements]
-    payload = {"values": rows_to_add}
+    
+    # [수정] index: 0을 추가하여 테이블의 맨 위에 행을 삽입합니다.
+    payload = {"values": rows_to_add, "index": 0}
+    
     try:
         response = requests.post(graph_url, headers=headers, json=payload)
         response.raise_for_status()
@@ -89,7 +93,7 @@ def save_announcements_to_excel(access_token, announcements):
     except Exception as e:
         print(f"❌ Excel 저장 중 오류 발생: {e}")
 
-# --- 3. 크롤러 핵심 함수들 (이전 버전과 동일) ---
+# --- 3. 크롤러 핵심 함수들 ---
 def send_email(subject, body, receiver_email):
     print("\n--- 이메일 발송 시도 ---")
     try:
@@ -151,7 +155,6 @@ def crawl_site(target, processed_links):
         if href and not href.startswith('http'):
             href = base_url.rstrip('/') + '/' + href.lstrip('/')
         
-        # [수정] 키워드 검사 로직을 제거하고, 링크 중복 여부만 확인합니다.
         if href and href not in processed_links:
             print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
             new_announcements.append({"company": company, "title": title, "href": href, "date": post_date})
@@ -159,16 +162,17 @@ def crawl_site(target, processed_links):
             processed_links.add(href)
             
     if not new_announcements: print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
+    
+    # [수정] reverse() 로직을 제거하여, 웹사이트에 보이는 순서 (보통 최신순) 그대로 리스트를 반환합니다.
     return new_announcements
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v2-All)를 시작합니다.\n" + "="*50)
+    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3 - 최신글 상단)를 시작합니다.\n" + "="*50)
     
     access_token = get_ms_graph_access_token()
     if not access_token: return
 
-    # [수정] Settings 시트에서 키워드를 불러오지 않습니다.
     settings_data = get_excel_data(access_token, "Settings")
     settings = {item['Setting']: item['Value'] for item in settings_data if 'Setting' in item and 'Value' in item}
     email_to_receive = settings.get('Receiver Email')
@@ -184,7 +188,6 @@ def main():
 
     for target in targets:
         if not target.get('company'): continue
-        # [수정] crawl_site 함수에 더 이상 keywords를 전달하지 않습니다.
         new_finds = crawl_site(target, processed_links)
         if new_finds:
             all_new_announcements.extend(new_finds)
