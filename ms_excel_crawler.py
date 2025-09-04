@@ -45,10 +45,7 @@ def get_excel_data(access_token, sheet_name):
         print("❌ MS_USER_PRINCIPAL_NAME 또는 MS_EXCEL_FILE_PATH Secret이 설정되지 않았습니다.")
         return []
     
-    # 중요: Excel 시트의 데이터 범위는 반드시 '표(Table)'로 만들어져 있어야 하며,
-    # 표 이름은 시트 이름과 동일하게 맞춰주어야 합니다. (예: Settings 시트의 표 이름도 Settings)
     graph_url = f"https://graph.microsoft.com/v1.0/users/{user_principal_name}/drive/root:/{excel_file_path}:/workbook/tables('{sheet_name}')/rows"
-    
     headers = {'Authorization': f'Bearer {access_token}', 'Content-Type': 'application/json'}
     
     try:
@@ -56,16 +53,12 @@ def get_excel_data(access_token, sheet_name):
         response.raise_for_status()
         rows_data = response.json().get('value', [])
         
-        # 헤더를 가져오기 위해 테이블 전체 범위를 조회
         header_url = f"https://graph.microsoft.com/v1.0/users/{user_principal_name}/drive/root:/{excel_file_path}:/workbook/tables('{sheet_name}')/headerRowRange"
         header_response = requests.get(header_url, headers=headers)
         header_response.raise_for_status()
         header = header_response.json()['values'][0]
 
-        records = []
-        for row in rows_data:
-            records.append(dict(zip(header, row['values'][0])))
-
+        records = [dict(zip(header, row['values'][0])) for row in rows_data]
         print(f"✅ Excel '{sheet_name}' 시트에서 {len(records)}개의 행을 로드했습니다.")
         return records
 
@@ -78,29 +71,15 @@ def get_excel_data(access_token, sheet_name):
         return []
 
 def save_announcements_to_excel(access_token, announcements):
-    """MS Graph API를 통해 Excel 시트에 새로운 공고를 저장합니다."""
     if not announcements: return
-
-    user_principal_name = os.environ.get('MS_USER_PRINCIPAL_NAME')
-    excel_file_path = os.environ.get('MS_EXCEL_FILE_PATH')
+    user_principal_name, excel_file_path = os.environ.get('MS_USER_PRINCIPAL_NAME'), os.environ.get('MS_EXCEL_FILE_PATH')
     sheet_name = "Collected_Announcements"
-
     graph_url = f"https://graph.microsoft.com/v1.0/users/{user_principal_name}/drive/root:/{excel_file_path}:/workbook/tables('{sheet_name}')/rows/add"
     headers = {'Authorization': f'Bearer {access_token}', 'Content-Type': 'application/json'}
-
     kst = timezone(timedelta(hours=9))
     collected_time_kst = datetime.now(kst).strftime('%Y-%m-%d %H:%M:%S')
-
-    rows_to_add = []
-    for ann in announcements:
-        row = [
-            collected_time_kst, ann['company'], ann['title'],
-            ann.get('date', 'N/A'), ann['href']
-        ]
-        rows_to_add.append(row)
-    
+    rows_to_add = [[collected_time_kst, ann['company'], ann['title'], ann.get('date', 'N/A'), ann['href']] for ann in announcements]
     payload = {"values": rows_to_add}
-    
     try:
         response = requests.post(graph_url, headers=headers, json=payload)
         response.raise_for_status()
@@ -115,17 +94,13 @@ def send_email(subject, body, receiver_email):
     print("\n--- 이메일 발송 시도 ---")
     try:
         smtp_user, smtp_password = os.environ.get('GMAIL_USER'), os.environ.get('GMAIL_PASSWORD')
-        if not all([smtp_user, smtp_password]):
-            print("❌ GMAIL_USER 또는 GMAIL_PASSWORD Secret이 설정되지 않았습니다.")
-            return
-    except Exception as e:
-        print(f"❌ GitHub Secrets 로드 실패: {e}"); return
+        if not all([smtp_user, smtp_password]): print("❌ GMAIL_USER 또는 GMAIL_PASSWORD Secret이 설정되지 않았습니다."); return
+    except Exception as e: print(f"❌ GitHub Secrets 로드 실패: {e}"); return
     msg = MIMEText(body, 'html', 'utf-8')
     msg['Subject'], msg['From'], msg['To'] = Header(subject, 'utf-8'), smtp_user, receiver_email
     try:
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(smtp_user, smtp_password)
+            server.starttls(); server.login(smtp_user, smtp_password)
             server.sendmail(msg['From'], [msg['To']], msg.as_string())
         print(f"✅ 이메일 발송 성공: {subject}")
     except Exception as e: print(f"❌ 이메일 발송 실패: {e}")
@@ -139,13 +114,13 @@ def save_processed_link(link):
 
 def generate_summary_email_body(announcements):
     kst = timezone(timedelta(hours=9))
-    html = """<head><style>body{font-family:sans-serif}.container{border:1px solid #ddd;padding:20px;margin:20px;border-radius:8px}h2{color:#005aab}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:12px;text-align:left}th{background-color:#f2f2f2}a{color:#005aab;text-decoration:none}a:hover{text-decoration:underline}.footer{margin-top:20px;font-size:12px;color:#888}</style></head><body><div class="container"><h2>📢 신규 입찰 공고 요약</h2><p><strong>""" + datetime.now(kst).strftime('%Y년 %m월 %d일') + """</strong>에 발견된 신규 공고 목록입니다.</p><table><thead><tr><th>회사명</th><th>공고일</th><th>공고 제목</th></tr></thead><tbody>"""
+    html = """<head><style>body{font-family:sans-serif}.container{border:1px solid #ddd;padding:20px;margin:20px;border-radius:8px}h2{color:#005aab}table{width:100%;border-collapse:collapse}th,td{border:1px solid #ddd;padding:12px;text-align:left}th{background-color:#f2f2f2}a{color:#005aab;text-decoration:none}a:hover{text-decoration:underline}.footer{margin-top:20px;font-size:12px;color:#888}</style></head><body><div class="container"><h2>📢 신규 공고 요약</h2><p><strong>""" + datetime.now(kst).strftime('%Y년 %m월 %d일') + """</strong>에 발견된 신규 공고 목록입니다.</p><table><thead><tr><th>회사명</th><th>공고일</th><th>공고 제목</th></tr></thead><tbody>"""
     for ann in announcements:
         html += f"""<tr><td>{ann['company']}</td><td>{ann.get('date', 'N/A')}</td><td><a href="{ann['href']}">{ann['title']}</a></td></tr>"""
     html += """</tbody></table><p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p></div></body>"""
     return html
 
-def crawl_site(target, keywords, processed_links):
+def crawl_site(target, processed_links):
     company, url, base_url = target.get('company','N/A'), target.get('url'), target.get('base_url','')
     item_selector, title_link_selector, date_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector')
     new_announcements = []
@@ -164,6 +139,7 @@ def crawl_site(target, keywords, processed_links):
     if not items:
         print(f"🟡 경고: '{company}'에서 '{item_selector}' 선택자에 해당하는 항목을 찾지 못했습니다.")
         return new_announcements
+        
     for item in items:
         title_link_element = item.select_one(title_link_selector)
         if not title_link_element: continue
@@ -174,30 +150,33 @@ def crawl_site(target, keywords, processed_links):
             if date_element: post_date = date_element.get_text(strip=True)
         if href and not href.startswith('http'):
             href = base_url.rstrip('/') + '/' + href.lstrip('/')
-        if any(keyword.lower() in title.lower() for keyword in keywords) and href and href not in processed_links:
+        
+        # [수정] 키워드 검사 로직을 제거하고, 링크 중복 여부만 확인합니다.
+        if href and href not in processed_links:
             print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
             new_announcements.append({"company": company, "title": title, "href": href, "date": post_date})
             save_processed_link(href)
             processed_links.add(href)
-    if not new_announcements: print(f"ℹ️ '{company}'에서 키워드에 맞는 새로운 공고를 찾지 못했습니다.")
+            
+    if not new_announcements: print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
     return new_announcements
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러를 시작합니다.\n" + "="*50)
+    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v2-All)를 시작합니다.\n" + "="*50)
     
     access_token = get_ms_graph_access_token()
     if not access_token: return
 
+    # [수정] Settings 시트에서 키워드를 불러오지 않습니다.
     settings_data = get_excel_data(access_token, "Settings")
     settings = {item['Setting']: item['Value'] for item in settings_data if 'Setting' in item and 'Value' in item}
-    keywords_to_find = [k.strip() for k in settings.get('Keywords (comma-separated)', '').split(',') if k.strip()]
     email_to_receive = settings.get('Receiver Email')
 
     targets = get_excel_data(access_token, "Crawl_Targets")
     
-    if not all([targets, keywords_to_find, email_to_receive]):
-        print("크롤링에 필요한 설정 정보(대상, 키워드, 수신 이메일)가 부족하여 작업을 종료합니다.")
+    if not targets or not email_to_receive:
+        print("크롤링에 필요한 설정 정보(대상, 수신 이메일)가 부족하여 작업을 종료합니다.")
         return
         
     processed_links = load_processed_links()
@@ -205,7 +184,8 @@ def main():
 
     for target in targets:
         if not target.get('company'): continue
-        new_finds = crawl_site(target, keywords_to_find, processed_links)
+        # [수정] crawl_site 함수에 더 이상 keywords를 전달하지 않습니다.
+        new_finds = crawl_site(target, processed_links)
         if new_finds:
             all_new_announcements.extend(new_finds)
         time.sleep(1)
@@ -215,7 +195,7 @@ def main():
     if all_new_announcements:
         save_announcements_to_excel(access_token, all_new_announcements)
         count = len(all_new_announcements)
-        subject = f"[입찰 공고] {count}개의 신규 공고가 있습니다."
+        subject = f"[신규 공고 알림] {count}개의 새로운 공고가 수집되었습니다."
         body = generate_summary_email_body(all_new_announcements)
         send_email(subject, body, email_to_receive)
     else:
