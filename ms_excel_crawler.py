@@ -7,122 +7,128 @@ import os
 import time
 from datetime import datetime, timezone, timedelta
 import json
-
-# Google Sheets 연동을 위한 라이브러리
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import msal  # Microsoft 인증 라이브러리
 
 # --- 1. 설정 및 전역 변수 ---
 PROCESSED_LINKS_FILE = 'processed_links.txt'
 
-# --- 2. Google Sheets 연동 함수들 ---
-def get_gspread_client():
-    """gspread 클라이언트를 인증하고 반환합니다."""
-    try:
-        creds_json_str = os.environ.get('GOOGLE_API_CREDENTIALS')
-        if not creds_json_str:
-            print("❌ GOOGLE_API_CREDENTIALS Secret이 설정되지 않았습니다.")
-            return None
-        creds_dict = json.loads(creds_json_str)
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        client = gspread.authorize(creds)
-        return client
-    except Exception as e:
-        print(f"❌ Google Sheets 클라이언트 인증 실패: {e}")
+# --- 2. Microsoft Graph API 연동 함수들 ---
+def get_ms_graph_access_token():
+    """Azure AD에서 MS Graph API 접근 토큰을 발급받습니다."""
+    tenant_id = os.environ.get('MS_TENANT_ID')
+    client_id = os.environ.get('MS_CLIENT_ID')
+    client_secret = os.environ.get('MS_CLIENT_SECRET')
+
+    if not all([tenant_id, client_id, client_secret]):
+        print("❌ MS_TENANT_ID, MS_CLIENT_ID, MS_CLIENT_SECRET Secret이 설정되지 않았습니다.")
         return None
 
-def load_settings_from_sheets(client, sheet_name):
-    """'Settings' 시트에서 설정을 불러옵니다."""
+    authority = f"https://login.microsoftonline.com/{tenant_id}"
+    app = msal.ConfidentialClientApplication(
+        client_id, authority=authority, client_credential=client_secret
+    )
+    result = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
+
+    if "access_token" in result:
+        print("✅ MS Graph API 토큰 발급 성공.")
+        return result['access_token']
+    else:
+        print("❌ MS Graph API 토큰 발급 실패:", result.get("error_description"))
+        return None
+
+def get_excel_data(access_token, sheet_name):
+    """MS Graph API를 통해 Excel 시트의 데이터를 불러옵니다."""
+    user_principal_name = os.environ.get('MS_USER_PRINCIPAL_NAME')
+    excel_file_path = os.environ.get('MS_EXCEL_FILE_PATH')
+
+    if not all([user_principal_name, excel_file_path]):
+        print("❌ MS_USER_PRINCIPAL_NAME 또는 MS_EXCEL_FILE_PATH Secret이 설정되지 않았습니다.")
+        return []
+    
+    # 중요: Excel 시트의 데이터 범위는 반드시 '표(Table)'로 만들어져 있어야 하며,
+    # 표 이름은 시트 이름과 동일하게 맞춰주어야 합니다. (예: Settings 시트의 표 이름도 Settings)
+    graph_url = f"https://graph.microsoft.com/v1.0/users/{user_principal_name}/drive/root:/{excel_file_path}:/workbook/tables('{sheet_name}')/rows"
+    
+    headers = {'Authorization': f'Bearer {access_token}', 'Content-Type': 'application/json'}
+    
     try:
-        sheet = client.open(sheet_name).worksheet("Settings")
-        settings_raw = sheet.get_all_records()
-        settings = {item['Setting']: item['Value'] for item in settings_raw}
+        response = requests.get(graph_url, headers=headers)
+        response.raise_for_status()
+        rows_data = response.json().get('value', [])
         
-        keywords = [k.strip() for k in settings.get('Keywords (comma-separated)', '').split(',') if k.strip()]
-        receiver_email = settings.get('Receiver Email')
+        # 헤더를 가져오기 위해 테이블 전체 범위를 조회
+        header_url = f"https://graph.microsoft.com/v1.0/users/{user_principal_name}/drive/root:/{excel_file_path}:/workbook/tables('{sheet_name}')/headerRowRange"
+        header_response = requests.get(header_url, headers=headers)
+        header_response.raise_for_status()
+        header = header_response.json()['values'][0]
 
-        if not receiver_email or not keywords:
-            print("❌ 'Settings' 시트에 'Receiver Email' 또는 'Keywords' 설정이 없습니다.")
-            return None, None
+        records = []
+        for row in rows_data:
+            records.append(dict(zip(header, row['values'][0])))
 
-        print("✅ 'Settings' 시트 로드 성공.")
-        return keywords, receiver_email
-    except gspread.exceptions.WorksheetNotFound:
-        print(f"❌ '{sheet_name}' 파일에 'Settings' 시트가 없습니다.")
-        return None, None
-    except Exception as e:
-        print(f"❌ 'Settings' 시트 로드 중 오류 발생: {e}")
-        return None, None
-
-def load_targets_from_sheets(client, sheet_name):
-    """'Crawl_Targets' 시트에서 크롤링 대상을 불러옵니다."""
-    try:
-        sheet = client.open(sheet_name).worksheet("Crawl_Targets")
-        records = sheet.get_all_records()
-        print(f"✅ 'Crawl_Targets' 시트에서 {len(records)}개의 대상을 불러왔습니다.")
+        print(f"✅ Excel '{sheet_name}' 시트에서 {len(records)}개의 행을 로드했습니다.")
         return records
-    except gspread.exceptions.WorksheetNotFound:
-        print(f"❌ '{sheet_name}' 파일에 'Crawl_Targets' 시트가 없습니다.")
+
+    except requests.exceptions.HTTPError as e:
+        print(f"❌ Excel '{sheet_name}' 시트 로드 실패 (HTTP {e.response.status_code}): {e.response.text}")
+        print("   (Excel 파일 경로, 시트/표 이름, API 권한을 확인해주세요.)")
         return []
     except Exception as e:
-        print(f"❌ 'Crawl_Targets' 시트 로드 중 오류 발생: {e}")
+        print(f"❌ Excel '{sheet_name}' 시트 처리 중 오류: {e}")
         return []
 
-def save_announcements_to_sheet(client, sheet_name, announcements):
-    """'Collected_Announcements' 시트에 새로운 공고를 저장합니다."""
-    if not announcements:
-        return
-    print(f"\n--- Google Sheets에 {len(announcements)}개의 신규 공고 저장 시도 ---")
+def save_announcements_to_excel(access_token, announcements):
+    """MS Graph API를 통해 Excel 시트에 새로운 공고를 저장합니다."""
+    if not announcements: return
+
+    user_principal_name = os.environ.get('MS_USER_PRINCIPAL_NAME')
+    excel_file_path = os.environ.get('MS_EXCEL_FILE_PATH')
+    sheet_name = "Collected_Announcements"
+
+    graph_url = f"https://graph.microsoft.com/v1.0/users/{user_principal_name}/drive/root:/{excel_file_path}:/workbook/tables('{sheet_name}')/rows/add"
+    headers = {'Authorization': f'Bearer {access_token}', 'Content-Type': 'application/json'}
+
+    kst = timezone(timedelta(hours=9))
+    collected_time_kst = datetime.now(kst).strftime('%Y-%m-%d %H:%M:%S')
+
+    rows_to_add = []
+    for ann in announcements:
+        row = [
+            collected_time_kst, ann['company'], ann['title'],
+            ann.get('date', 'N/A'), ann['href']
+        ]
+        rows_to_add.append(row)
+    
+    payload = {"values": rows_to_add}
+    
     try:
-        sheet = client.open(sheet_name).worksheet("Collected_Announcements")
-        rows_to_add = []
-        
-        kst = timezone(timedelta(hours=9))
-        collected_time_kst = datetime.now(kst).strftime('%Y-%m-%d %H:%M:%S')
-
-        for ann in announcements:
-            row = [
-                collected_time_kst,
-                ann['company'],
-                ann['title'],
-                ann.get('date', 'N/A'),
-                ann['href']
-            ]
-            rows_to_add.append(row)
-        
-        # 'USER_ENTERED' 옵션으로 셀 서식을 유지하며 데이터 추가
-        sheet.append_rows(rows_to_add, value_input_option='USER_ENTERED')
-        print("✅ Google Sheets에 신규 공고 저장 완료.")
-    except gspread.exceptions.WorksheetNotFound:
-        print(f"❌ '{sheet_name}' 파일에 'Collected_Announcements' 시트가 없습니다.")
+        response = requests.post(graph_url, headers=headers, json=payload)
+        response.raise_for_status()
+        print("✅ Excel에 신규 공고 저장 완료.")
+    except requests.exceptions.HTTPError as e:
+        print(f"❌ Excel 저장 중 오류 발생 (HTTP {e.response.status_code}): {e.response.text}")
     except Exception as e:
-        print(f"❌ Google Sheets 저장 중 오류 발생: {e}")
+        print(f"❌ Excel 저장 중 오류 발생: {e}")
 
-# --- 3. 크롤러 핵심 함수들 ---
+# --- 3. 크롤러 핵심 함수들 (이전 버전과 동일) ---
 def send_email(subject, body, receiver_email):
     print("\n--- 이메일 발송 시도 ---")
     try:
-        smtp_user = os.environ.get('GMAIL_USER')
-        smtp_password = os.environ.get('GMAIL_PASSWORD')
-        if not smtp_user or not smtp_password:
+        smtp_user, smtp_password = os.environ.get('GMAIL_USER'), os.environ.get('GMAIL_PASSWORD')
+        if not all([smtp_user, smtp_password]):
             print("❌ GMAIL_USER 또는 GMAIL_PASSWORD Secret이 설정되지 않았습니다.")
             return
     except Exception as e:
-        print(f"❌ GitHub Secrets 로드 실패: {e}")
-        return
+        print(f"❌ GitHub Secrets 로드 실패: {e}"); return
     msg = MIMEText(body, 'html', 'utf-8')
-    msg['Subject'] = Header(subject, 'utf-8')
-    msg['From'] = smtp_user
-    msg['To'] = receiver_email
+    msg['Subject'], msg['From'], msg['To'] = Header(subject, 'utf-8'), smtp_user, receiver_email
     try:
         with smtplib.SMTP("smtp.gmail.com", 587) as server:
             server.starttls()
             server.login(smtp_user, smtp_password)
             server.sendmail(msg['From'], [msg['To']], msg.as_string())
         print(f"✅ 이메일 발송 성공: {subject}")
-    except Exception as e:
-        print(f"❌ 이메일 발송 실패: {e}")
+    except Exception as e: print(f"❌ 이메일 발송 실패: {e}")
 
 def load_processed_links():
     if not os.path.exists(PROCESSED_LINKS_FILE): return set()
@@ -140,73 +146,55 @@ def generate_summary_email_body(announcements):
     return html
 
 def crawl_site(target, keywords, processed_links):
-    company = target.get('company','N/A')
-    url = target.get('url')
-    base_url = target.get('base_url','')
-    item_selector = target.get('item_selector')
-    title_link_selector = target.get('title_link_selector')
-    date_selector = target.get('date_selector', '')
-
+    company, url, base_url = target.get('company','N/A'), target.get('url'), target.get('base_url','')
+    item_selector, title_link_selector, date_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector')
     new_announcements = []
-    
     if not all([url, item_selector, title_link_selector]):
         print(f"🟡 경고: '{company}'의 url, item_selector 또는 title_link_selector가 비어있어 건너뜁니다.")
         return new_announcements
-
     print(f"\n--- '{company}' 사이트 크롤링 시작 ---")
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
         response = requests.get(url, headers=headers, timeout=15)
         response.raise_for_status()
     except requests.RequestException as e:
-        print(f"❌ '{company}' 사이트 접속 실패: {e}")
-        return new_announcements
-
+        print(f"❌ '{company}' 사이트 접속 실패: {e}"); return new_announcements
     soup = BeautifulSoup(response.text, 'html.parser')
     items = soup.select(item_selector)
     if not items:
         print(f"🟡 경고: '{company}'에서 '{item_selector}' 선택자에 해당하는 항목을 찾지 못했습니다.")
         return new_announcements
-
     for item in items:
         title_link_element = item.select_one(title_link_selector)
-        
-        if not title_link_element:
-            continue
-
-        title = title_link_element.get_text(strip=True)
-        href = title_link_element.get('href', '')
-        
+        if not title_link_element: continue
+        title, href = title_link_element.get_text(strip=True), title_link_element.get('href', '')
         post_date = "N/A"
         if date_selector:
             date_element = item.select_one(date_selector)
-            if date_element:
-                post_date = date_element.get_text(strip=True)
-
+            if date_element: post_date = date_element.get_text(strip=True)
         if href and not href.startswith('http'):
             href = base_url.rstrip('/') + '/' + href.lstrip('/')
-            
         if any(keyword.lower() in title.lower() for keyword in keywords) and href and href not in processed_links:
             print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
             new_announcements.append({"company": company, "title": title, "href": href, "date": post_date})
             save_processed_link(href)
             processed_links.add(href)
-            
-    if not new_announcements:
-        print(f"ℹ️ '{company}'에서 키워드에 맞는 새로운 공고를 찾지 못했습니다.")
+    if not new_announcements: print(f"ℹ️ '{company}'에서 키워드에 맞는 새로운 공고를 찾지 못했습니다.")
     return new_announcements
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    print("="*50 + "\nGoogle Sheets 연동 입찰 공고 크롤러 (v3-flexible)를 시작합니다.\n" + "="*50)
+    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러를 시작합니다.\n" + "="*50)
     
-    google_sheet_filename = "나의 크롤러 설정 시트" # 여기에 실제 Google Sheet 파일 이름을 입력하세요.
+    access_token = get_ms_graph_access_token()
+    if not access_token: return
 
-    client = get_gspread_client()
-    if not client: return
+    settings_data = get_excel_data(access_token, "Settings")
+    settings = {item['Setting']: item['Value'] for item in settings_data if 'Setting' in item and 'Value' in item}
+    keywords_to_find = [k.strip() for k in settings.get('Keywords (comma-separated)', '').split(',') if k.strip()]
+    email_to_receive = settings.get('Receiver Email')
 
-    keywords_to_find, email_to_receive = load_settings_from_sheets(client, google_sheet_filename)
-    targets = load_targets_from_sheets(client, google_sheet_filename)
+    targets = get_excel_data(access_token, "Crawl_Targets")
     
     if not all([targets, keywords_to_find, email_to_receive]):
         print("크롤링에 필요한 설정 정보(대상, 키워드, 수신 이메일)가 부족하여 작업을 종료합니다.")
@@ -225,7 +213,7 @@ def main():
     print("\n--- 모든 사이트 크롤링 완료 ---")
 
     if all_new_announcements:
-        save_announcements_to_sheet(client, google_sheet_filename, all_new_announcements)
+        save_announcements_to_excel(access_token, all_new_announcements)
         count = len(all_new_announcements)
         subject = f"[입찰 공고] {count}개의 신규 공고가 있습니다."
         body = generate_summary_email_body(all_new_announcements)
