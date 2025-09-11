@@ -10,3 +10,5 @@ https://omoney.kbstar.com/quics?page=C018592&boardId=648&compId=b031439&articleI
 https://omoney.kbstar.com/quics?page=C018592&boardId=648&compId=b031439&articleId=140614&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
 https://omoney.kbstar.com/quics?page=C018592&boardId=648&compId=b031439&articleId=140526&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
 https://omoney.kbstar.com/quics?page=C018592&boardId=648&compId=b031439&articleId=140981&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://omoney.kbstar.com/quics?page=C018592&boardId=648&compId=b031439&articleId=140997&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://omoney.kbstar.com/quics?page=C018592&boardId=648&compId=b031439&articleId=140913&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
