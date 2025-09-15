@@ -145,7 +145,8 @@ def handle_css_crawl(target, session):
     """CSS 선택자 기반의 일반적인 웹사이트 크롤링을 처리합니다."""
     url, base_url = target.get('url'), target.get('base_url', '')
     item_selector, title_link_selector, date_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector')
-    js_render = target.get('js_render', '').upper() == 'Y'
+    # [수정] Excel에서 빈 값(None)을 읽어올 경우를 대비하여 or '' 추가
+    js_render = (target.get('js_render') or '').upper() == 'Y'
 
     if not all([url, item_selector, title_link_selector]):
         print(f"🟡 경고: '{target.get('company')}'의 url, item_selector 또는 title_link_selector가 비어있어 건너뜁니다.")
@@ -216,7 +217,8 @@ def handle_css_crawl(target, session):
 def handle_api_crawl(target, session):
     """JSON API 기반의 크롤링을 처리합니다."""
     api_url = target.get('api_url')
-    method = target.get('api_method', 'GET').upper()
+    # [수정] Excel에서 빈 값(None)을 읽어올 경우를 대비하여 or 'GET' 추가
+    method = (target.get('api_method') or 'GET').upper()
     
     # JSON 경로 문자열을 리스트로 변환
     def get_path(path_str):
@@ -290,7 +292,8 @@ def handle_api_crawl(target, session):
 def crawl_site(target, processed_links, session):
     """크롤링 대상을 분기하여 실행하고 신규 공고를 반환합니다."""
     company = target.get('company', 'N/A')
-    crawl_type = target.get('crawl_type', 'CSS').upper()
+    # [수정] Excel에서 crawl_type이 비어있을 경우(None)를 대비하여 or 'CSS' 추가
+    crawl_type = (target.get('crawl_type') or 'CSS').upper()
 
     print(f"\n--- '{company}' ({crawl_type}) 사이트 크롤링 시작 ---")
     
@@ -371,3 +374,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
