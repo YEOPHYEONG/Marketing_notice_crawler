@@ -124,6 +124,54 @@ def generate_summary_email_body(announcements):
     html += """</tbody></table><p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p></div></body>"""
     return html
 
+def crawl_site_nh_networks(target, processed_links):
+    """농협네트웍스 전용 크롤러 (AJAX POST 요청)"""
+    company = target.get('company', 'N/A')
+    api_url = "https://www.nhnetworks.co.kr/cs/notice_list_ajax.do"
+    base_url = "https://www.nhnetworks.co.kr"
+    new_announcements = []
+    
+    try:
+        payload = {'page': '1'}
+        response = requests.post(api_url, data=payload)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        items = soup.select('table.board tbody tr.content_table')
+
+        for item in items:
+            title_element = item.select_one('td.title a')
+            date_element = item.select_one('td.date')
+
+            if not title_element or not date_element:
+                continue
+
+            title = title_element.get_text(strip=True)
+            onclick_attr = title_element.get('onclick', '')
+            post_date = date_element.get_text(strip=True)
+            
+            href = None
+            match = re.search(r"go_detail\('(\d+)'\)", onclick_attr)
+            if match:
+                board_seq = match.group(1)
+                href = f"{base_url}/cs/notice_detail.do?boardSeq={board_seq}"
+            
+            if href and href not in processed_links:
+                print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
+                new_announcements.append({"company": company, "title": title, "href": href, "date": post_date})
+                save_processed_link(href)
+                processed_links.add(href)
+
+    except requests.RequestException as e:
+        print(f"❌ '{company}' API 접속 실패: {e}")
+    except Exception as e:
+        print(f"❌ '{company}' 처리 중 오류 발생: {e}")
+
+    if not new_announcements:
+        print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
+        
+    return new_announcements
+
 def crawl_site_kb_financial(target, processed_links):
     """KB금융 전용 크롤러 (API 직접 호출)"""
     company = target.get('company', 'N/A')
@@ -338,7 +386,7 @@ def crawl_site(target, processed_links):
     if company == '롯데홈쇼핑': return crawl_site_lotte_hs(target, processed_links)
     if company == 'KB국민은행': return crawl_site_kb_bank(target, processed_links)
     if company == 'KB금융': return crawl_site_kb_financial(target, processed_links)
-
+    if company == '농협네트웍스': return crawl_site_nh_networks(target, processed_links)
 
     url, base_url = target.get('url'), target.get('base_url','')
     item_selector, title_link_selector, date_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector')
@@ -405,7 +453,7 @@ def crawl_site(target, processed_links):
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.7 - KB금융 API 지원)를 시작합니다.\n" + "="*50)
+    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.8 - 농협네트웍스 API 지원)를 시작합니다.\n" + "="*50)
     
     access_token = get_ms_graph_access_token()
     if not access_token: return
