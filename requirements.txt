@@ -3,5 +3,4 @@ beautifulsoup4
 msal
 requests-html
 python-dateutil
-lxml
-lxml_html_clean
+lxml[html_clean]
