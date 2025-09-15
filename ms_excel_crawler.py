@@ -72,7 +72,7 @@ def get_excel_data(access_token, sheet_name):
         return []
 
 def save_announcements_to_excel(access_token, announcements):
-    """[수정] 새로운 공고를 Excel 테이블의 맨 위에 삽입합니다."""
+    """새로운 공고를 Excel 테이블의 맨 위에 삽입합니다."""
     if not announcements: return
     user_principal_name, excel_file_path = os.environ.get('MS_USER_PRINCIPAL_NAME'), os.environ.get('MS_EXCEL_FILE_PATH')
     sheet_name = "Collected_Announcements"
@@ -124,13 +124,108 @@ def generate_summary_email_body(announcements):
     html += """</tbody></table><p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p></div></body>"""
     return html
 
+def crawl_site_samsung_life(target, processed_links):
+    """삼성생명 전용 크롤러 (API 직접 호출)"""
+    company = target.get('company', 'N/A')
+    api_url = "https://www.samsunglife.com/api-web/v1/display/notice/list"
+    new_announcements = []
+    
+    try:
+        payload = {"searchTxt": "", "currentPage": 1, "pageBlockSize": 10}
+        response = requests.post(api_url, json=payload)
+        response.raise_for_status()
+        data = response.json()
+        
+        for item in data.get('list', []):
+            title = item.get('title')
+            post_date = item.get('regDate')
+            cont_id = item.get('contId')
+            
+            if not all([title, post_date, cont_id]):
+                continue
+
+            href = f"https://www.samsunglife.com/individual/cnt/notice/view/PDC-NTVIW010100M?contId={cont_id}"
+            
+            if href and href not in processed_links:
+                print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
+                new_announcements.append({"company": company, "title": title, "href": href, "date": post_date})
+                save_processed_link(href)
+                processed_links.add(href)
+
+    except requests.RequestException as e:
+        print(f"❌ '{company}' API 접속 실패: {e}")
+    except json.JSONDecodeError:
+        print(f"❌ '{company}' API 응답 JSON 파싱 실패.")
+    except Exception as e:
+        print(f"❌ '{company}' 처리 중 오류 발생: {e}")
+
+    if not new_announcements:
+        print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
+        
+    return new_announcements
+
+def crawl_site_modu_tour(target, processed_links):
+    """모두투어 전용 크롤러 (XML 데이터 호출)"""
+    company = target.get('company', 'N/A')
+    api_url = "https://www.modetournetwork.com/Common/Data/XmlData.aspx"
+    new_announcements = []
+
+    try:
+        # '모두공지' 게시판 K=113, 1페이지, 10개씩
+        payload = {'K': '113', 'CP': '1', 'PS': '10'}
+        response = requests.post(api_url, data=payload)
+        response.raise_for_status()
+        
+        # XML 파싱
+        soup = BeautifulSoup(response.content, 'xml')
+        items = soup.find_all('Board')
+
+        for item in items:
+            title = item.find('TITLE').text if item.find('TITLE') else '제목 없음'
+            post_date = item.find('REGDATE').text if item.find('REGDATE') else '날짜 없음'
+            tid = item.find('TID').text if item.find('TID') else None
+
+            if not tid:
+                continue
+
+            href = f"https://www.modetournetwork.com/Promotion/view.aspx?K=113&TID={tid}"
+            
+            if href and href not in processed_links:
+                print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
+                new_announcements.append({"company": company, "title": title, "href": href, "date": post_date})
+                save_processed_link(href)
+                processed_links.add(href)
+                
+    except requests.RequestException as e:
+        print(f"❌ '{company}' API 접속 실패: {e}")
+    except Exception as e:
+        print(f"❌ '{company}' 처리 중 오류 발생: {e}")
+        
+    if not new_announcements:
+        print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
+        
+    return new_announcements
+
+
 def crawl_site(target, processed_links):
-    company, url, base_url = target.get('company','N/A'), target.get('url'), target.get('base_url','')
-    item_selector, title_link_selector, date_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector')
+    company = target.get('company','N/A')
+    url = target.get('url')
+    base_url = target.get('base_url','')
+    item_selector = target.get('item_selector')
+    title_link_selector = target.get('title_link_selector')
+    date_selector = target.get('date_selector')
+    
+    # [코드 수정] 회사별 전용 크롤러 분기 처리
+    if company == '삼성생명':
+        return crawl_site_samsung_life(target, processed_links)
+    if company == '모두투어':
+        return crawl_site_modu_tour(target, processed_links)
+
     new_announcements = []
     if not all([url, item_selector, title_link_selector]):
         print(f"🟡 경고: '{company}'의 url, item_selector 또는 title_link_selector가 비어있어 건너뜁니다.")
         return new_announcements
+        
     print(f"\n--- '{company}' 사이트 크롤링 시작 ---")
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
@@ -138,6 +233,7 @@ def crawl_site(target, processed_links):
         response.raise_for_status()
     except requests.RequestException as e:
         print(f"❌ '{company}' 사이트 접속 실패: {e}"); return new_announcements
+    
     soup = BeautifulSoup(response.text, 'html.parser')
     items = soup.select(item_selector)
     if not items:
@@ -145,23 +241,27 @@ def crawl_site(target, processed_links):
         return new_announcements
         
     for item in items:
-        title_link_element = item.select_one(title_link_selector)
-        if not title_link_element: continue
-        title = title_link_element.get_text(strip=True)
-        href = title_link_element.get('href', '')
+        title_element = item.select_one(title_link_selector)
+        if not title_element: continue
         
-        # --- [코드 수정] 'onclick' 속성에서 링크를 추출하는 로직 추가 ---
-        if not href:
-            button_element = item.select_one('button[onclick]')
+        title = title_element.get_text(strip=True)
+        href = title_element.get('href', '')
+
+        if not href or 'javascript' in href:
+            button_element = item.select_one("button[onclick*='showContent']")
             if button_element:
                 onclick_attr = button_element.get('onclick', '')
-                # 정규식을 사용하여 "showContent('게시물번호')" 에서 숫자만 추출
                 match = re.search(r"showContent\('(\d+)'\)", onclick_attr)
                 if match:
                     seq = match.group(1)
-                    # 교보생명 URL 구조에 맞게 링크 생성
                     href = f"/dgt/web/customer/notice/{seq}"
-        # --- [코드 수정] 종료 ---
+            else:
+                link_tag = item.select_one('a[data-seq]')
+                if link_tag:
+                    seq = link_tag.get('data-seq')
+                    data_url = link_tag.get('data-url')
+                    if seq and data_url:
+                        href = f'/{data_url}?seq={seq}'
 
         post_date = "N/A"
         if date_selector:
@@ -183,7 +283,7 @@ def crawl_site(target, processed_links):
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.1 - onclick 지원)를 시작합니다.\n" + "="*50)
+    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.4 - 모두투어 API 지원)를 시작합니다.\n" + "="*50)
     
     access_token = get_ms_graph_access_token()
     if not access_token: return
