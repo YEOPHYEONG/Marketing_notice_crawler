@@ -8,6 +8,7 @@ import time
 from datetime import datetime, timezone, timedelta
 import json
 import msal  # Microsoft 인증 라이브러리
+import re # 'onclick' 속성 파싱을 위해 정규식 라이브러리 추가
 
 # --- 1. 설정 및 전역 변수 ---
 PROCESSED_LINKS_FILE = 'processed_links.txt'
@@ -64,7 +65,7 @@ def get_excel_data(access_token, sheet_name):
 
     except requests.exceptions.HTTPError as e:
         print(f"❌ Excel '{sheet_name}' 시트 로드 실패 (HTTP {e.response.status_code}): {e.response.text}")
-        print("   (Excel 파일 경로, 시트/표 이름, API 권한을 확인해주세요.)")
+        print("     (Excel 파일 경로, 시트/표 이름, API 권한을 확인해주세요.)")
         return []
     except Exception as e:
         print(f"❌ Excel '{sheet_name}' 시트 처리 중 오류: {e}")
@@ -81,7 +82,6 @@ def save_announcements_to_excel(access_token, announcements):
     collected_time_kst = datetime.now(kst).strftime('%Y-%m-%d %H:%M:%S')
     rows_to_add = [[collected_time_kst, ann['company'], ann['title'], ann.get('date', 'N/A'), ann['href']] for ann in announcements]
     
-    # [수정] index: 0을 추가하여 테이블의 맨 위에 행을 삽입합니다.
     payload = {"values": rows_to_add, "index": 0}
     
     try:
@@ -147,11 +147,27 @@ def crawl_site(target, processed_links):
     for item in items:
         title_link_element = item.select_one(title_link_selector)
         if not title_link_element: continue
-        title, href = title_link_element.get_text(strip=True), title_link_element.get('href', '')
+        title = title_link_element.get_text(strip=True)
+        href = title_link_element.get('href', '')
+        
+        # --- [코드 수정] 'onclick' 속성에서 링크를 추출하는 로직 추가 ---
+        if not href:
+            button_element = item.select_one('button[onclick]')
+            if button_element:
+                onclick_attr = button_element.get('onclick', '')
+                # 정규식을 사용하여 "showContent('게시물번호')" 에서 숫자만 추출
+                match = re.search(r"showContent\('(\d+)'\)", onclick_attr)
+                if match:
+                    seq = match.group(1)
+                    # 교보생명 URL 구조에 맞게 링크 생성
+                    href = f"/dgt/web/customer/notice/{seq}"
+        # --- [코드 수정] 종료 ---
+
         post_date = "N/A"
         if date_selector:
             date_element = item.select_one(date_selector)
             if date_element: post_date = date_element.get_text(strip=True)
+        
         if href and not href.startswith('http'):
             href = base_url.rstrip('/') + '/' + href.lstrip('/')
         
@@ -163,12 +179,11 @@ def crawl_site(target, processed_links):
             
     if not new_announcements: print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
     
-    # [수정] reverse() 로직을 제거하여, 웹사이트에 보이는 순서 (보통 최신순) 그대로 리스트를 반환합니다.
     return new_announcements
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3 - 최신글 상단)를 시작합니다.\n" + "="*50)
+    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.1 - onclick 지원)를 시작합니다.\n" + "="*50)
     
     access_token = get_ms_graph_access_token()
     if not access_token: return
