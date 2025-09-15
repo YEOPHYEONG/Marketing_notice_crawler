@@ -124,6 +124,46 @@ def generate_summary_email_body(announcements):
     html += """</tbody></table><p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p></div></body>"""
     return html
 
+def crawl_site_kb_financial(target, processed_links):
+    """KB금융 전용 크롤러 (API 직접 호출)"""
+    company = target.get('company', 'N/A')
+    api_url = "https://www.kbfg.com/api/kbfg/notics?bulbdId=9&page=1&pageSize=9"
+    new_announcements = []
+
+    try:
+        response = requests.get(api_url)
+        response.raise_for_status()
+        data = response.json()
+
+        for item in data.get('result', {}).get('posts', []):
+            title = item.get('titl')
+            post_date = item.get('rgcrYms', '').split(' ')[0] # YYYY-MM-DD 형식으로 변경
+            content_id = item.get('bltcId')
+            board_id = item.get('bulbdId')
+
+            if not all([title, post_date, content_id, board_id]):
+                continue
+            
+            href = f"https://www.kbfg.com/kor/pr/notice/view.htm?CONTENT={content_id}&B={board_id}"
+
+            if href and href not in processed_links:
+                print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
+                new_announcements.append({"company": company, "title": title, "href": href, "date": post_date})
+                save_processed_link(href)
+                processed_links.add(href)
+
+    except requests.RequestException as e:
+        print(f"❌ '{company}' API 접속 실패: {e}")
+    except json.JSONDecodeError:
+        print(f"❌ '{company}' API 응답 JSON 파싱 실패.")
+    except Exception as e:
+        print(f"❌ '{company}' 처리 중 오류 발생: {e}")
+
+    if not new_announcements:
+        print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
+        
+    return new_announcements
+
 def crawl_site_samsung_life(target, processed_links):
     """삼성생명 전용 크롤러 (API 직접 호출)"""
     company = target.get('company', 'N/A')
@@ -297,6 +337,8 @@ def crawl_site(target, processed_links):
     if company == '모두투어': return crawl_site_modu_tour(target, processed_links)
     if company == '롯데홈쇼핑': return crawl_site_lotte_hs(target, processed_links)
     if company == 'KB국민은행': return crawl_site_kb_bank(target, processed_links)
+    if company == 'KB금융': return crawl_site_kb_financial(target, processed_links)
+
 
     url, base_url = target.get('url'), target.get('base_url','')
     item_selector, title_link_selector, date_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector')
@@ -363,7 +405,7 @@ def crawl_site(target, processed_links):
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.6 - KB국민은행 API 지원)를 시작합니다.\n" + "="*50)
+    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.7 - KB금융 API 지원)를 시작합니다.\n" + "="*50)
     
     access_token = get_ms_graph_access_token()
     if not access_token: return
