@@ -171,7 +171,6 @@ def crawl_site_modu_tour(target, processed_links):
     new_announcements = []
 
     try:
-        # '모두공지' 게시판 K=113, 1페이지, 10개씩
         payload = {'K': '113', 'CP': '1', 'PS': '10'}
         response = requests.post(api_url, data=payload)
         response.raise_for_status()
@@ -244,7 +243,51 @@ def crawl_site_lotte_hs(target, processed_links):
         print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
         
     return new_announcements
+    
+def crawl_site_kb_bank(target, processed_links):
+    """KB국민은행 전용 크롤러 (POST 요청)"""
+    company = target.get('company', 'N/A')
+    api_url = "https://oabout.kbstar.com/quics?page=C018592"
+    new_announcements = []
 
+    try:
+        payload = {
+            'boardId': '648', 'compId': 'b031439', 'bbsMode': 'list', 'viewPage': '1'
+        }
+        response = requests.post(api_url, data=payload)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        items = soup.select('table.tbl_list tbody tr')
+
+        for item in items:
+            title_element = item.select_one('td.left a')
+            date_element = item.select_one('td.date')
+
+            if not title_element or not date_element:
+                continue
+
+            title = title_element.get_text(strip=True)
+            href = title_element.get('href')
+            post_date = date_element.get_text(strip=True)
+            
+            if href:
+                full_href = "https://oabout.kbstar.com/" + href.lstrip('/')
+                if full_href not in processed_links:
+                    print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
+                    new_announcements.append({"company": company, "title": title, "href": full_href, "date": post_date})
+                    save_processed_link(full_href)
+                    processed_links.add(full_href)
+
+    except requests.RequestException as e:
+        print(f"❌ '{company}' API 접속 실패: {e}")
+    except Exception as e:
+        print(f"❌ '{company}' 처리 중 오류 발생: {e}")
+        
+    if not new_announcements:
+        print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
+        
+    return new_announcements
 
 def crawl_site(target, processed_links):
     company = target.get('company','N/A')
@@ -253,6 +296,7 @@ def crawl_site(target, processed_links):
     if company == '삼성생명': return crawl_site_samsung_life(target, processed_links)
     if company == '모두투어': return crawl_site_modu_tour(target, processed_links)
     if company == '롯데홈쇼핑': return crawl_site_lotte_hs(target, processed_links)
+    if company == 'KB국민은행': return crawl_site_kb_bank(target, processed_links)
 
     url, base_url = target.get('url'), target.get('base_url','')
     item_selector, title_link_selector, date_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector')
@@ -319,7 +363,7 @@ def crawl_site(target, processed_links):
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.5 - 롯데홈쇼핑 API 지원)를 시작합니다.\n" + "="*50)
+    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.6 - KB국민은행 API 지원)를 시작합니다.\n" + "="*50)
     
     access_token = get_ms_graph_access_token()
     if not access_token: return
