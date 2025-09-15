@@ -176,7 +176,6 @@ def crawl_site_modu_tour(target, processed_links):
         response = requests.post(api_url, data=payload)
         response.raise_for_status()
         
-        # XML 파싱
         soup = BeautifulSoup(response.content, 'xml')
         items = soup.find_all('Board')
 
@@ -185,8 +184,7 @@ def crawl_site_modu_tour(target, processed_links):
             post_date = item.find('REGDATE').text if item.find('REGDATE') else '날짜 없음'
             tid = item.find('TID').text if item.find('TID') else None
 
-            if not tid:
-                continue
+            if not tid: continue
 
             href = f"https://www.modetournetwork.com/Promotion/view.aspx?K=113&TID={tid}"
             
@@ -201,6 +199,47 @@ def crawl_site_modu_tour(target, processed_links):
     except Exception as e:
         print(f"❌ '{company}' 처리 중 오류 발생: {e}")
         
+    if not new_announcements: print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
+    return new_announcements
+
+def crawl_site_lotte_hs(target, processed_links):
+    """롯데홈쇼핑 전용 크롤러 (JSON API 호출)"""
+    company = target.get('company', 'N/A')
+    api_url = "https://www.lottehomeshopping.com/user/pr/informList.lotte"
+    new_announcements = []
+
+    try:
+        payload = {
+            'code': 'inform', 'status': '1', 'etc': '1',
+            'currentPageNo': '1', 'search_type': 'subject', 'search_keyword': ''
+        }
+        response = requests.post(api_url, data=payload)
+        response.raise_for_status()
+        data = response.json()
+        
+        for item in data.get('resultList', []):
+            title = item.get('SUBJECT')
+            post_date = item.get('REG_DATE')
+            post_id = item.get('ID')
+
+            if not all([title, post_date, post_id]):
+                continue
+
+            href = f"https://www.lottehomeshopping.com/user/pr/informRead.lotte?id={post_id}"
+
+            if href and href not in processed_links:
+                print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
+                new_announcements.append({"company": company, "title": title, "href": href, "date": post_date})
+                save_processed_link(href)
+                processed_links.add(href)
+
+    except requests.RequestException as e:
+        print(f"❌ '{company}' API 접속 실패: {e}")
+    except json.JSONDecodeError:
+        print(f"❌ '{company}' API 응답 JSON 파싱 실패.")
+    except Exception as e:
+        print(f"❌ '{company}' 처리 중 오류 발생: {e}")
+
     if not new_announcements:
         print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
         
@@ -209,18 +248,15 @@ def crawl_site_modu_tour(target, processed_links):
 
 def crawl_site(target, processed_links):
     company = target.get('company','N/A')
-    url = target.get('url')
-    base_url = target.get('base_url','')
-    item_selector = target.get('item_selector')
-    title_link_selector = target.get('title_link_selector')
-    date_selector = target.get('date_selector')
     
     # [코드 수정] 회사별 전용 크롤러 분기 처리
-    if company == '삼성생명':
-        return crawl_site_samsung_life(target, processed_links)
-    if company == '모두투어':
-        return crawl_site_modu_tour(target, processed_links)
+    if company == '삼성생명': return crawl_site_samsung_life(target, processed_links)
+    if company == '모두투어': return crawl_site_modu_tour(target, processed_links)
+    if company == '롯데홈쇼핑': return crawl_site_lotte_hs(target, processed_links)
 
+    url, base_url = target.get('url'), target.get('base_url','')
+    item_selector, title_link_selector, date_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector')
+    
     new_announcements = []
     if not all([url, item_selector, title_link_selector]):
         print(f"🟡 경고: '{company}'의 url, item_selector 또는 title_link_selector가 비어있어 건너뜁니다.")
@@ -283,7 +319,7 @@ def crawl_site(target, processed_links):
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.4 - 모두투어 API 지원)를 시작합니다.\n" + "="*50)
+    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.5 - 롯데홈쇼핑 API 지원)를 시작합니다.\n" + "="*50)
     
     access_token = get_ms_graph_access_token()
     if not access_token: return
