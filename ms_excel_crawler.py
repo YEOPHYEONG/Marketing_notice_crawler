@@ -123,6 +123,46 @@ def generate_summary_email_body(announcements):
         html += f"""<tr><td>{ann['company']}</td><td>{ann.get('date', 'N/A')}</td><td><a href="{ann['href']}">{ann['title']}</a></td></tr>"""
     html += """</tbody></table><p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p></div></body>"""
     return html
+    
+def crawl_site_hyundai_motor(target, processed_links):
+    """현대차 전용 크롤러 (API POST 호출)"""
+    company = target.get('company', 'N/A')
+    api_url = "https://www.hyundai.com/wsvc/kr/ko/notice"
+    new_announcements = []
+    
+    try:
+        payload = {'name': '', 'type': '0', 'page': '1'}
+        response = requests.post(api_url, data=payload)
+        response.raise_for_status()
+        data = response.json()
+
+        for item in data.get('data', []):
+            title = item.get('pwiTitlSbc')
+            post_date = item.get('rgstDtm')
+            post_id = item.get('pwiImtrSn')
+
+            if not all([title, post_date, post_id]):
+                continue
+            
+            href = f"https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn={post_id}"
+
+            if href and href not in processed_links:
+                print(f"🚀 새로운 공고 발견: [{company}] {title} (공고일: {post_date})")
+                new_announcements.append({"company": company, "title": title, "href": href, "date": post_date})
+                save_processed_link(href)
+                processed_links.add(href)
+
+    except requests.RequestException as e:
+        print(f"❌ '{company}' API 접속 실패: {e}")
+    except json.JSONDecodeError:
+        print(f"❌ '{company}' API 응답 JSON 파싱 실패.")
+    except Exception as e:
+        print(f"❌ '{company}' 처리 중 오류 발생: {e}")
+
+    if not new_announcements:
+        print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
+        
+    return new_announcements
 
 def crawl_site_kakao_bank(target, processed_links):
     """카카오뱅크 전용 크롤러 (API 직접 호출)"""
@@ -469,6 +509,7 @@ def crawl_site(target, processed_links):
     if company == '농협네트웍스': return crawl_site_nh_networks(target, processed_links)
     if company == '다올저축은행': return crawl_site_daol_bank(target, processed_links)
     if company == '카카오뱅크': return crawl_site_kakao_bank(target, processed_links)
+    if company == '현대차': return crawl_site_hyundai_motor(target, processed_links)
 
 
     url, base_url = target.get('url'), target.get('base_url','')
@@ -536,7 +577,7 @@ def crawl_site(target, processed_links):
 
 # --- 4. 메인 실행 로직 ---
 def main():
-    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.10 - 카카오뱅크 API 지원)를 시작합니다.\n" + "="*50)
+    print("="*50 + "\nMS Excel 연동 입찰 공고 크롤러 (v3.11 - 현대차 API 지원)를 시작합니다.\n" + "="*50)
     
     access_token = get_ms_graph_access_token()
     if not access_token: return
