@@ -510,3 +510,6 @@ https://corp.skylife.co.kr/pr/notice_list.do?page=1&searchColumn=&searchString=&
 https://corp.skylife.co.kr/pr/notice_list.do?page=1&searchColumn=&searchString=&searchSelect=/pr/notice_view.do?pk_bbs=20325&page=1&searchColumn=&searchString=&searchSelect=
 https://corp.skylife.co.kr/pr/notice_list.do?page=1&searchColumn=&searchString=&searchSelect=/pr/notice_view.do?pk_bbs=20324&page=1&searchColumn=&searchString=&searchSelect=
 https://corp.skylife.co.kr/pr/notice_list.do?page=1&searchColumn=&searchString=&searchSelect=/pr/notice_view.do?pk_bbs=20244&page=1&searchColumn=&searchString=&searchSelect=
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=141023&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1510952_115430.jsp
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=6797
