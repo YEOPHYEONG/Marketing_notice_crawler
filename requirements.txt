@@ -3,4 +3,5 @@ beautifulsoup4
 msal
 requests-html
 python-dateutil
-lxml # requests-html이 내부적으로 사용, 명시적 추가 권장
+lxml
+lxml_html_clean
