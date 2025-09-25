@@ -1383,3 +1383,4 @@ https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=953
 https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=951
 https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=950
 https://www.nonghyup.com/#none
+https://spot.wooribank.com/{base_url}/pot/Dream?withyou=BPPBC0011&bbsMode=view&boardId=B00072&articleId=B00072
