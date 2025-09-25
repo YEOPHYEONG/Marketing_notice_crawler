@@ -61,7 +61,6 @@ def get_excel_data(access_token, sheet_name):
         header_response.raise_for_status()
         header = header_response.json()['values'][0]
 
-        # 빈 행('')을 None으로 변환하여 일관성 유지
         records = [dict(zip(header, [val if val != '' else None for val in row['values'][0]])) for row in rows_data]
         print(f"✅ Excel '{sheet_name}' 시트에서 {len(records)}개의 행을 로드했습니다.")
         return records
@@ -128,26 +127,21 @@ def generate_summary_email_body(announcements):
     return html
 
 def standardize_date(date_str):
-    """다양한 형식의 날짜 문자열을 YYYY-MM-DD 형식으로 변환합니다."""
-    if not date_str or not isinstance(date_str, str):
-        return "N/A"
+    if not date_str or not isinstance(date_str, str): return "N/A"
     try:
-        # 정규식으로 'YYYY.MM.DD' 또는 'YYYY-MM-DD' 등의 기본 형식만 추출
         match = re.search(r'\d{4}[-.]\d{1,2}[-.]\d{1,2}', date_str)
-        if match:
-            return date_parse(match.group()).strftime('%Y-%m-%d')
-        return date_str # 매칭되는 형식이 없으면 원본 반환
-    except Exception:
-        return date_str # 파싱 실패 시 원본 반환
+        if match: return date_parse(match.group()).strftime('%Y-%m-%d')
+        return date_str
+    except Exception: return date_str
 
 # --- 4. 크롤링 전략별 핸들러 ---
 def handle_css_crawl(target, session):
     """CSS 선택자 기반의 일반적인 웹사이트 크롤링을 처리합니다."""
     url, base_url = target.get('url'), target.get('base_url', '')
-    item_selector, title_link_selector, date_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector')
+    item_selector, title_selector, date_selector, link_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector'), target.get('link_selector')
     js_render = (target.get('js_render') or '').upper() == 'Y'
 
-    if not all([url, item_selector, title_link_selector]):
+    if not all([url, item_selector, title_selector]):
         print(f"🟡 경고: '{target.get('company')}'의 url, item_selector 또는 title_link_selector가 비어있어 건너뜁니다.")
         return []
 
@@ -169,35 +163,41 @@ def handle_css_crawl(target, session):
             
         announcements = []
         for item in items:
-            title_element = item.select_one(title_link_selector)
+            title_element = item.select_one(title_selector)
             if not title_element: continue
             
             title = title_element.get_text(strip=True)
-            href = title_element.get('href', '')
+            link_element = item.select_one(link_selector) if link_selector else title_element
+            if not link_element: continue
+
+            href = link_element.get('href', '')
             
-            # 링크 추출 로직 강화
-            if not href or href.strip() == '#' or 'javascript' in href.lower():
-                onclick_attr = title_element.get('onclick') or (title_element.find_parent('button') and title_element.find_parent('button').get('onclick'))
+            if not href or href.strip() in ['#', 'javascript:void(0);', 'javascript:;']:
+                onclick_attr = link_element.get('onclick')
+                if not onclick_attr:
+                    parent_button = link_element.find_parent(['button', 'a'])
+                    if parent_button: onclick_attr = parent_button.get('onclick')
+
                 if onclick_attr:
-                    # Case 1: getItem('someId', ...)
-                    match = re.search(r"getItem\s*\(\s*['\"]([^'\"]+)['\"]", onclick_attr)
+                    match = re.search(r"['\"]([^'\"]+)['\"]", onclick_attr)
                     if match:
                         link_part = match.group(1)
                         link_format = target.get('link_format')
                         if link_format:
                             href = link_format.replace('{id}', link_part)
-                    else:
-                        # Case 2: showContent('someId')
-                        match = re.search(r"showContent\s*\(\s*['\"]([^'\"]+)['\"]", onclick_attr)
-                        if match:
-                            seq = match.group(1)
-                            href = f"{base_url or url}/{seq}" # base_url과 seq 조합
-                else: # button 태그의 속성에서 직접 ID 찾기 (교보생명 유형)
-                    button_parent = title_element.find_parent('button')
-                    if button_parent and button_parent.has_attr('seq'):
-                         seq = button_parent['seq']
-                         href = f"{base_url}/{seq}"
-
+                else:
+                    seq = link_element.get('seq') or link_element.get('data-seq')
+                    if not seq:
+                         parent_with_seq = link_element.find_parent(attrs={'seq': True}) or link_element.find_parent(attrs={'data-seq': True})
+                         if parent_with_seq: seq = parent_with_seq.get('seq') or parent_with_seq.get('data-seq')
+                    
+                    if seq:
+                        link_format = target.get('link_format')
+                        if link_format:
+                            href = link_format.replace('{id}', seq)
+                        else: # 기본 조합 규칙
+                            data_url_part = link_element.get('data-url', '')
+                            href = f"{base_url or url.rstrip('/')}/{data_url_part}/{seq}"
 
             post_date = "N/A"
             if date_selector:
@@ -212,165 +212,91 @@ def handle_css_crawl(target, session):
 
         return announcements
 
-    except requests.exceptions.Timeout:
-        print(f"❌ '{target.get('company')}' 사이트 접속 시간 초과.")
-        return []
-    except requests.RequestException as e:
-        print(f"❌ '{target.get('company')}' 사이트 접속 실패: {e}")
-        return []
-    except Exception as e:
-        print(f"❌ '{target.get('company')}' 처리 중 알 수 없는 오류: {e}")
-        return []
-
+    except requests.exceptions.Timeout: print(f"❌ '{target.get('company')}' 사이트 접속 시간 초과."); return []
+    except requests.RequestException as e: print(f"❌ '{target.get('company')}' 사이트 접속 실패: {e}"); return []
+    except Exception as e: print(f"❌ '{target.get('company')}' 처리 중 알 수 없는 오류: {e}"); return []
 
 def handle_api_crawl(target, session):
     """JSON API 기반의 크롤링을 처리합니다."""
-    api_url = target.get('api_url')
-    method = (target.get('api_method') or 'GET').upper()
-    
-    def get_path(path_str):
-        return path_str.split('.') if path_str else []
-
-    item_path = get_path(target.get('json_item_path'))
-    title_path = get_path(target.get('json_title_path'))
-    link_id_path = get_path(target.get('json_link_id_path'))
-    date_path = get_path(target.get('json_date_path'))
-    link_format = target.get('link_format')
+    api_url, method = target.get('api_url'), (target.get('api_method') or 'GET').upper()
+    def get_path(path_str): return path_str.split('.') if path_str else []
+    item_path, title_path, link_id_path, date_path, link_format = get_path(target.get('json_item_path')), get_path(target.get('json_title_path')), get_path(target.get('json_link_id_path')), get_path(target.get('json_date_path')), target.get('link_format')
 
     if not all([api_url, item_path, title_path, link_id_path, link_format]):
-        print(f"🟡 경고: '{target.get('company')}'의 API 설정이 부족하여 건너뜁니다.")
-        return []
-
+        print(f"🟡 경고: '{target.get('company')}'의 API 설정이 부족하여 건너뜁니다."); return []
     try:
         payload_str = target.get('api_payload')
         payload = json.loads(payload_str) if payload_str else None
-
-        if method == 'POST':
-            response = session.post(api_url, json=payload, data=None if payload else target.get('api_form_data'))
-        else: # GET
-            response = session.get(api_url, params=payload)
-        
+        response = session.post(api_url, json=payload, data=None if payload else target.get('api_form_data')) if method == 'POST' else session.get(api_url, params=payload)
         response.raise_for_status()
         data = response.json()
-
         items = data
         for key in item_path:
             items = items.get(key, [])
-            if not isinstance(items, list):
-                print(f"🟡 경고: '{target.get('company')}'의 json_item_path '{'.'.join(item_path)}'가 리스트가 아닙니다.")
-                return []
-        
+            if not isinstance(items, list): print(f"🟡 경고: '{target.get('company')}'의 json_item_path '{'.'.join(item_path)}'가 리스트가 아닙니다."); return []
         announcements = []
         for item in items:
-            title = item
+            title, link_id, post_date = item, item, "N/A"
             for key in title_path: title = title.get(key)
-            
-            link_id = item
             for key in link_id_path: link_id = link_id.get(key)
-            
-            post_date = "N/A"
             if date_path:
                 date_val = item
                 for key in date_path: date_val = date_val.get(key)
-                if isinstance(date_val, int) and date_val > 10000000000:
-                    post_date = datetime.fromtimestamp(date_val / 1000).strftime('%Y-%m-%d')
-                else:
-                    post_date = standardize_date(str(date_val))
-
+                if isinstance(date_val, int) and date_val > 10000000000: post_date = datetime.fromtimestamp(date_val / 1000).strftime('%Y-%m-%d')
+                else: post_date = standardize_date(str(date_val))
             if title and link_id:
                 href = link_format.replace('{id}', str(link_id))
                 announcements.append({"title": str(title), "href": href, "date": post_date})
-        
         return announcements
-
-    except requests.RequestException as e:
-        print(f"❌ '{target.get('company')}' API 접속 실패: {e}")
-        return []
-    except json.JSONDecodeError:
-        print(f"❌ '{target.get('company')}' API 응답이 JSON 형식이 아닙니다.")
-        return []
-    except Exception as e:
-        print(f"❌ '{target.get('company')}' API 처리 중 오류 발생: {e}")
-        return []
+    except requests.RequestException as e: print(f"❌ '{target.get('company')}' API 접속 실패: {e}"); return []
+    except json.JSONDecodeError: print(f"❌ '{target.get('company')}' API 응답이 JSON 형식이 아닙니다."); return []
+    except Exception as e: print(f"❌ '{target.get('company')}' API 처리 중 오류 발생: {e}"); return []
 
 # --- 5. 메인 실행 로직 ---
 def crawl_site(target, processed_links, session):
-    """크롤링 대상을 분기하여 실행하고 신규 공고를 반환합니다."""
-    company = target.get('company', 'N/A')
-    crawl_type = (target.get('crawl_type') or 'CSS').upper()
-
+    company, crawl_type = target.get('company', 'N/A'), (target.get('crawl_type') or 'CSS').upper()
     print(f"\n--- '{company}' ({crawl_type}) 사이트 크롤링 시작 ---")
-    
+    results = handle_css_crawl(target, session) if crawl_type == 'CSS' else handle_api_crawl(target, session) if crawl_type == 'API' else []
+    if crawl_type not in ['CSS', 'API']: print(f"🟡 경고: '{company}'의 crawl_type '{crawl_type}'은 지원되지 않는 형식입니다.")
     new_announcements = []
-    if crawl_type == 'CSS':
-        results = handle_css_crawl(target, session)
-    elif crawl_type == 'API':
-        results = handle_api_crawl(target, session)
-    else:
-        print(f"🟡 경고: '{company}'의 crawl_type '{crawl_type}'은 지원되지 않는 형식입니다.")
-        results = []
-
     if results:
         for ann in results:
             ann['company'] = company
             if ann['href'] and ann['href'] not in processed_links:
                 print(f"🚀 새로운 공고 발견: [{company}] {ann['title']} (공고일: {ann['date']})")
                 new_announcements.append(ann)
-                save_processed_link(ann['href'])
-                processed_links.add(ann['href'])
-    
-    if not new_announcements:
-        print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
-        
+                save_processed_link(ann['href']); processed_links.add(ann['href'])
+    if not new_announcements: print(f"ℹ️ '{company}'에서 새로운 공고를 찾지 못했습니다.")
     return new_announcements
 
 def main():
     print("="*60 + f"\n입찰 공고 크롤러 (v4.0 - 설정 기반 아키텍처)를 시작합니다.\n" + "="*60)
-    
     access_token = get_ms_graph_access_token()
     if not access_token: return
-
     settings_data = get_excel_data(access_token, "Settings")
     settings = {item['Setting']: item['Value'] for item in settings_data if item.get('Setting') and item.get('Value')}
     email_to_receive = settings.get('Receiver Email')
-
     targets = get_excel_data(access_token, "Crawl_Targets")
-    
     if not targets or not email_to_receive:
-        print("❌ 크롤링에 필요한 설정 정보(대상, 수신 이메일)가 부족하여 작업을 종료합니다.")
-        return
-        
-    processed_links = load_processed_links()
-    all_new_announcements = []
-    
-    session = HTMLSession()
-
+        print("❌ 크롤링에 필요한 설정 정보(대상, 수신 이메일)가 부족하여 작업을 종료합니다."); return
+    processed_links, all_new_announcements, session = load_processed_links(), [], HTMLSession()
     for target in targets:
-        if not target.get('company'): 
-            continue
+        if not target.get('company'): continue
         try:
             new_finds = crawl_site(target, processed_links, session)
-            if new_finds:
-                all_new_announcements.extend(new_finds)
-        except Exception as e:
-            print(f"🚨 '{target.get('company')}' 크롤링 중 치명적 오류 발생: {e}")
+            if new_finds: all_new_announcements.extend(new_finds)
+        except Exception as e: print(f"🚨 '{target.get('company')}' 크롤링 중 치명적 오류 발생: {e}")
         time.sleep(1)
-
     print("\n" + "="*25 + " 모든 사이트 크롤링 완료 " + "="*25)
-
     if all_new_announcements:
         all_new_announcements.sort(key=lambda x: (x.get('date', '0000-00-00'), x.get('company')), reverse=True)
-        
         save_announcements_to_excel(access_token, all_new_announcements)
-        count = len(all_new_announcements)
-        subject = f"[신규 공고 알림] {count}개의 새로운 공고가 수집되었습니다."
+        subject = f"[신규 공고 알림] {len(all_new_announcements)}개의 새로운 공고가 수집되었습니다."
         body = generate_summary_email_body(all_new_announcements)
         send_email(subject, body, email_to_receive)
     else:
         print("\nℹ️ 모든 사이트에서 새로운 공고를 찾지 못했습니다.")
-        
     print("\n" + "="*30 + " 작업 종료 " + "="*30)
-
 
 if __name__ == '__main__':
     main()
