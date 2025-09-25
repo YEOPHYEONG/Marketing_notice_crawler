@@ -145,7 +145,6 @@ def handle_css_crawl(target, session):
     """CSS 선택자 기반의 일반적인 웹사이트 크롤링을 처리합니다."""
     url, base_url = target.get('url'), target.get('base_url', '')
     item_selector, title_link_selector, date_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector')
-    # [수정] Excel에서 빈 값(None)을 읽어올 경우를 대비하여 or '' 추가
     js_render = (target.get('js_render') or '').upper() == 'Y'
 
     if not all([url, item_selector, title_link_selector]):
@@ -159,9 +158,8 @@ def handle_css_crawl(target, session):
 
         if js_render:
             print(f"ℹ️ '{target.get('company')}' 사이트는 JavaScript 렌더링을 사용합니다.")
-            response.html.render(sleep=3, timeout=20) # 3초 대기하며 JS 렌더링
+            response.html.render(sleep=3, timeout=20)
         
-        # BeautifulSoup과 호환성을 위해 response.html.html 사용
         soup = BeautifulSoup(response.html.html, 'html.parser')
         items = soup.select(item_selector)
 
@@ -177,18 +175,29 @@ def handle_css_crawl(target, session):
             title = title_element.get_text(strip=True)
             href = title_element.get('href', '')
             
-            # onclick 등에서 링크 추출하는 로직 추가
-            if not href or 'javascript' in href.lower():
-                onclick_attr = title_element.get('onclick', '')
+            # 링크 추출 로직 강화
+            if not href or href.strip() == '#' or 'javascript' in href.lower():
+                onclick_attr = title_element.get('onclick') or (title_element.find_parent('button') and title_element.find_parent('button').get('onclick'))
                 if onclick_attr:
-                    # 예: fn_view('1234') -> 1234 추출
-                    match = re.search(r"[(']([^()']+)[')]", onclick_attr)
+                    # Case 1: getItem('someId', ...)
+                    match = re.search(r"getItem\s*\(\s*['\"]([^'\"]+)['\"]", onclick_attr)
                     if match:
                         link_part = match.group(1)
-                        # Excel에 정의된 link_format을 사용하여 완전한 URL 조합
                         link_format = target.get('link_format')
                         if link_format:
                             href = link_format.replace('{id}', link_part)
+                    else:
+                        # Case 2: showContent('someId')
+                        match = re.search(r"showContent\s*\(\s*['\"]([^'\"]+)['\"]", onclick_attr)
+                        if match:
+                            seq = match.group(1)
+                            href = f"{base_url or url}/{seq}" # base_url과 seq 조합
+                else: # button 태그의 속성에서 직접 ID 찾기 (교보생명 유형)
+                    button_parent = title_element.find_parent('button')
+                    if button_parent and button_parent.has_attr('seq'):
+                         seq = button_parent['seq']
+                         href = f"{base_url}/{seq}"
+
 
             post_date = "N/A"
             if date_selector:
@@ -217,10 +226,8 @@ def handle_css_crawl(target, session):
 def handle_api_crawl(target, session):
     """JSON API 기반의 크롤링을 처리합니다."""
     api_url = target.get('api_url')
-    # [수정] Excel에서 빈 값(None)을 읽어올 경우를 대비하여 or 'GET' 추가
     method = (target.get('api_method') or 'GET').upper()
     
-    # JSON 경로 문자열을 리스트로 변환
     def get_path(path_str):
         return path_str.split('.') if path_str else []
 
@@ -246,17 +253,15 @@ def handle_api_crawl(target, session):
         response.raise_for_status()
         data = response.json()
 
-        # json_item_path를 따라 아이템 리스트 추출
         items = data
         for key in item_path:
             items = items.get(key, [])
-            if not isinstance(items, list): # 경로 중간이 리스트가 아니면 오류
+            if not isinstance(items, list):
                 print(f"🟡 경고: '{target.get('company')}'의 json_item_path '{'.'.join(item_path)}'가 리스트가 아닙니다.")
                 return []
         
         announcements = []
         for item in items:
-            # title, link_id, date 추출
             title = item
             for key in title_path: title = title.get(key)
             
@@ -267,7 +272,7 @@ def handle_api_crawl(target, session):
             if date_path:
                 date_val = item
                 for key in date_path: date_val = date_val.get(key)
-                if isinstance(date_val, int) and date_val > 10000000000: # timestamp (ms)
+                if isinstance(date_val, int) and date_val > 10000000000:
                     post_date = datetime.fromtimestamp(date_val / 1000).strftime('%Y-%m-%d')
                 else:
                     post_date = standardize_date(str(date_val))
@@ -292,7 +297,6 @@ def handle_api_crawl(target, session):
 def crawl_site(target, processed_links, session):
     """크롤링 대상을 분기하여 실행하고 신규 공고를 반환합니다."""
     company = target.get('company', 'N/A')
-    # [수정] Excel에서 crawl_type이 비어있을 경우(None)를 대비하여 or 'CSS' 추가
     crawl_type = (target.get('crawl_type') or 'CSS').upper()
 
     print(f"\n--- '{company}' ({crawl_type}) 사이트 크롤링 시작 ---")
@@ -306,7 +310,6 @@ def crawl_site(target, processed_links, session):
         print(f"🟡 경고: '{company}'의 crawl_type '{crawl_type}'은 지원되지 않는 형식입니다.")
         results = []
 
-    # 처리된 링크와 비교하여 신규 공고만 필터링
     if results:
         for ann in results:
             ann['company'] = company
@@ -340,11 +343,9 @@ def main():
     processed_links = load_processed_links()
     all_new_announcements = []
     
-    # 세션 객체를 생성하여 TCP 연결을 재사용
     session = HTMLSession()
 
     for target in targets:
-        # 'company' 필드가 비어있으면 해당 행은 건너뜀
         if not target.get('company'): 
             continue
         try:
@@ -353,12 +354,11 @@ def main():
                 all_new_announcements.extend(new_finds)
         except Exception as e:
             print(f"🚨 '{target.get('company')}' 크롤링 중 치명적 오류 발생: {e}")
-        time.sleep(1) # 사이트 간 최소 딜레이
+        time.sleep(1)
 
     print("\n" + "="*25 + " 모든 사이트 크롤링 완료 " + "="*25)
 
     if all_new_announcements:
-        # 최신순으로 정렬 (날짜 -> 회사명)
         all_new_announcements.sort(key=lambda x: (x.get('date', '0000-00-00'), x.get('company')), reverse=True)
         
         save_announcements_to_excel(access_token, all_new_announcements)
@@ -374,4 +374,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
