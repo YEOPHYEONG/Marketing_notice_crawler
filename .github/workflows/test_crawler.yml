@@ -1,0 +1,41 @@
+name: Manual Test - MS Excel Bid Crawler
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      
+      - name: Run Python script in TEST mode
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
+          MS_TENANT_ID: ${{ secrets.MS_TENANT_ID }}
+          MS_CLIENT_ID: ${{ secrets.MS_CLIENT_ID }}
+          MS_CLIENT_SECRET: ${{ secrets.MS_CLIENT_SECRET }}
+          MS_USER_PRINCIPAL_NAME: ${{ secrets.MS_USER_PRINCIPAL_NAME }}
+          MS_EXCEL_FILE_PATH: ${{ secrets.MS_EXCEL_FILE_PATH }}
+          WORKFLOW_TYPE: 'TEST' # 테스트 모드를 위한 환경 변수
+        run: python ms_excel_crawler.py
+        
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git add processed_links.txt
+          git diff --staged --quiet || git commit -m "Update processed links (Test Run)"
+          git push
