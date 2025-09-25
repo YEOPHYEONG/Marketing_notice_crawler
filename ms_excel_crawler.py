@@ -175,8 +175,8 @@ def handle_css_crawl(target, session):
             if not href or href.strip() in ['#', 'javascript:void(0);', 'javascript:;']:
                 onclick_attr = link_element.get('onclick')
                 if not onclick_attr:
-                    parent_button = link_element.find_parent(['button', 'a'])
-                    if parent_button: onclick_attr = parent_button.get('onclick')
+                    parent_with_onclick = link_element.find_parent(onclick=True)
+                    if parent_with_onclick: onclick_attr = parent_with_onclick.get('onclick')
 
                 if onclick_attr:
                     match = re.search(r"['\"]([^'\"]+)['\"]", onclick_attr)
@@ -185,7 +185,7 @@ def handle_css_crawl(target, session):
                         link_format = target.get('link_format')
                         if link_format:
                             href = link_format.replace('{id}', link_part)
-                else:
+                else: # onclick이 없는 경우, data-seq 등의 속성에서 직접 ID 찾기
                     seq = link_element.get('seq') or link_element.get('data-seq')
                     if not seq:
                          parent_with_seq = link_element.find_parent(attrs={'seq': True}) or link_element.find_parent(attrs={'data-seq': True})
@@ -195,9 +195,12 @@ def handle_css_crawl(target, session):
                         link_format = target.get('link_format')
                         if link_format:
                             href = link_format.replace('{id}', seq)
-                        else: # 기본 조합 규칙
+                        else:
                             data_url_part = link_element.get('data-url', '')
-                            href = f"{base_url or url.rstrip('/')}/{data_url_part}/{seq}"
+                            # data-url이 있으면 base_url과 조합, 없으면 그냥 url과 조합
+                            final_base = (base_url or url).rstrip('/')
+                            href = f"{final_base}/{data_url_part}/{seq}" if data_url_part else f"{final_base}/{seq}"
+
 
             post_date = "N/A"
             if date_selector:
@@ -205,7 +208,14 @@ def handle_css_crawl(target, session):
                 if date_element: post_date = standardize_date(date_element.get_text(strip=True))
             
             if href and not href.startswith('http'):
-                href = (base_url or url).rstrip('/') + '/' + href.lstrip('/')
+                final_base_url = (base_url or url).rstrip('/')
+                # ../ 로 시작하는 상대 경로 처리
+                if href.startswith('../'):
+                    from urllib.parse import urljoin
+                    href = urljoin(final_base_url + '/', href)
+                else:
+                    href = final_base_url + '/' + href.lstrip('/')
+
             
             if href and title:
                 announcements.append({"title": title, "href": href, "date": post_date})
