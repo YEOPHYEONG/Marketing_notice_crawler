@@ -171,6 +171,11 @@ def handle_css_crawl(target, session):
         response = session.get(url, headers=headers, timeout=20)
         response.raise_for_status()
 
+        # [수정] 흥국생명과 같은 EUC-KR 인코딩 사이트를 위해 인코딩을 수동으로 설정
+        if 'heungkuklife' in url:
+            response.encoding = 'EUC-KR'
+            print(f"ℹ️ '{target.get('company')}' 사이트의 인코딩을 EUC-KR로 설정했습니다.")
+
         if js_render:
             print(f"ℹ️ '{target.get('company')}' 사이트는 JavaScript 렌더링을 사용합니다.")
             response.html.render(sleep=3, timeout=20) # 3초 대기하며 JS 렌더링
