@@ -1393,3 +1393,4 @@ https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20250728&s
 https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20250728&seqno=8813&gubun=14&pageNum=1&searchGubun=0
 https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20250724&seqno=8812&gubun=14&pageNum=1&searchGubun=0
 https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=6811
+https://investments.miraeasset.com/magi/board/news/list.do?boardCode=1&menuId=/magi/board/news/view.do?id=16187&boardCode=1
