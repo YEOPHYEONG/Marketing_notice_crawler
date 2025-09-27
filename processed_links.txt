@@ -1405,3 +1405,6 @@ https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynam
 https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11832");
 https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11831");
 https://kbcapital.co.kr/custCenr/cmknMtrEvnt/cmknMtrList.kbc/javascript:goPageCmknMtrDtl('107938');
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1512411_115430.jsp
+https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11835");
+https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11834");
