@@ -142,6 +142,13 @@ def generate_summary_email_body(announcements):
     html += """</tbody></table><p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p></div></body>"""
     return html
 
+# --- [추가된 함수] ---
+def generate_no_new_announcements_email_body():
+    """신규 공고가 없을 때 발송할 이메일 본문을 생성합니다."""
+    kst = timezone(timedelta(hours=9))
+    html = """<head><style>body{font-family:sans-serif}.container{border:1px solid #ddd;padding:20px;margin:20px;border-radius:8px}h2{color:#005aab}.footer{margin-top:20px;font-size:12px;color:#888}</style></head><body><div class="container"><h2>📝 금일 신규 입찰 공고 없음</h2><p><strong>""" + datetime.now(kst).strftime('%Y년 %m월 %d일') + """</strong> 기준, 모니터링 중인 사이트에서 새로운 입찰 공고를 찾지 못했습니다.</p><p class="footer">본 메일은 자동화된 스크립트에 의해 발송되었습니다.</p></div></body>"""
+    return html
+
 def standardize_date(date_str):
     """다양한 형식의 날짜 문자열을 YYYY-MM-DD 형식으로 변환합니다."""
     if not date_str or not isinstance(date_str, str):
@@ -331,7 +338,7 @@ def crawl_site(target, processed_links, session):
     return new_announcements
 
 def main():
-    print("="*60 + f"\n입찰 공고 크롤러 (v4.1 - 이메일 수신자 분리)를 시작합니다.\n" + "="*60)
+    print("="*60 + f"\n입찰 공고 크롤러 (v4.2 - 공고 없을 시에도 메일 발송)를 시작합니다.\n" + "="*60)
     
     access_token = get_ms_graph_access_token()
     if not access_token: return
@@ -381,6 +388,7 @@ def main():
 
     print("\n" + "="*25 + " 모든 사이트 크롤링 완료 " + "="*25)
 
+    # --- [수정된 부분] ---
     if all_new_announcements:
         all_new_announcements.sort(key=lambda x: (x.get('date', '0000-00-00'), x.get('company')), reverse=True)
         
@@ -390,7 +398,13 @@ def main():
         body = generate_summary_email_body(all_new_announcements)
         send_email(subject, body, receiver_emails)
     else:
-        print("\nℹ️ 모든 사이트에서 새로운 공고를 찾지 못했습니다.")
+        # 신규 공고가 없을 때도 이메일을 발송하도록 변경
+        print("\nℹ️ 모든 사이트에서 새로운 공고를 찾지 못했습니다. 결과 이메일을 발송합니다.")
+        kst = timezone(timedelta(hours=9))
+        today_str = datetime.now(kst).strftime('%Y-%m-%d')
+        subject = f"[입찰 공고 알림] {today_str} 신규 공고 없음"
+        body = generate_no_new_announcements_email_body() # 새로 추가한 함수 호출
+        send_email(subject, body, receiver_emails)
         
     print("\n" + "="*30 + " 작업 종료 " + "="*30)
 
