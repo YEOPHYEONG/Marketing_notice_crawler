@@ -1460,3 +1460,16 @@ https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11847");
 https://kbcapital.co.kr/custCenr/cmknMtrEvnt/cmknMtrList.kbc/javascript:goPageCmknMtrDtl('107955');
 https://kbcapital.co.kr/custCenr/cmknMtrEvnt/cmknMtrList.kbc/javascript:goPageCmknMtrDtl('107954');
 https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=6841
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516602_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516592_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516569_115430.jsp
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20251013?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=1
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250924?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=2
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250922?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=3
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250919?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=4
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250822?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=5
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250820?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=6
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-202507071?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=7
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250630?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=8
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-2025602?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=9
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250527?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=10
