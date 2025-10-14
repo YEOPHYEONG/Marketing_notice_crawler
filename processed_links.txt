@@ -1473,3 +1473,9 @@ https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=al
 https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250630?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=8
 https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-2025602?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=9
 https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250527?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=10
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516611_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516601_115430.jsp
+https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11852");
+https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11851");
+https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11850");
+https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11849");
