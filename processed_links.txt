@@ -1479,3 +1479,8 @@ https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11852");
 https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11851");
 https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11850");
 https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11849");
+https://www.hyundaihmall.com/md/cia/selectBbsDtl?bbsId=54359&ancmBbsGbcd=16&bbsNo=85
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516624_115430.jsp
+https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20251015&seqno=8833&gubun=14&pageNum=1&searchGubun=0
+https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11853");
+https://kbcapital.co.kr/custCenr/cmknMtrEvnt/cmknMtrList.kbc/javascript:goPageCmknMtrDtl('107965');
