@@ -1484,3 +1484,9 @@ https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news0
 https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20251015&seqno=8833&gubun=14&pageNum=1&searchGubun=0
 https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11853");
 https://kbcapital.co.kr/custCenr/cmknMtrEvnt/cmknMtrList.kbc/javascript:goPageCmknMtrDtl('107965');
+https://www.heungkukfire.co.kr/FRW/companyIntro/tender.do/javascript:frmView2('tender','257846', '614');
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516654_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516651_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516644_115430.jsp
+https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13285&page=1
+https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13284&page=1
