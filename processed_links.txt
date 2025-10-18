@@ -1495,3 +1495,4 @@ https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news0
 https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516667_115430.jsp
 https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516640_115430.jsp
 https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=6850
+https://kbcapital.co.kr/custCenr/cmknMtrEvnt/cmknMtrList.kbc/javascript:goPageCmknMtrDtl('107848');
