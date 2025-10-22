@@ -1520,3 +1520,7 @@ https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=al
 https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-2025602?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=10
 https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13286&page=1
 https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11858");
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=141341&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=141340&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516797_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516767_115430.jsp
