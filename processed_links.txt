@@ -1539,3 +1539,8 @@ https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11862");
 https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=141555&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
 https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516867_115430.jsp
 https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13289&page=1
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516895_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516886_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516803_115430.jsp
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=6870
+https://corp.skylife.co.kr/pr/notice_list.do?page=1&searchColumn=&searchString=&searchSelect=/pr/notice_view.do?pk_bbs=22084&page=1&searchColumn=&searchString=&searchSelect=
