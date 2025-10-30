@@ -1550,3 +1550,5 @@ https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynam
 https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11866");
 https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11865");
 https://corp.skylife.co.kr/pr/notice_list.do?page=1&searchColumn=&searchString=&searchSelect=/pr/notice_view.do?pk_bbs=22085&page=1&searchColumn=&searchString=&searchSelect=
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1516908_115430.jsp
+https://kbcapital.co.kr/custCenr/cmknMtrEvnt/cmknMtrList.kbc/javascript:goPageCmknMtrDtl('108003');
