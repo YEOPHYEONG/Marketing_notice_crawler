@@ -1565,3 +1565,14 @@ https://kbcapital.co.kr/custCenr/cmknMtrEvnt/cmknMtrList.kbc/javascript:goPageCm
 https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13290&page=1
 https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20251103&seqno=8836&gubun=14&pageNum=1&searchGubun=0
 https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11876");
+https://www.lotteins.co.kr/web/C/D/cdl0220.jsp/javascript:goViewPage("127");
+https://www.heungkukfire.co.kr/FRW/companyIntro/tender.do/javascript:frmView2('tender','259105', '619');
+https://www.heungkukfire.co.kr/FRW/companyIntro/tender.do/javascript:frmView2('tender','258890', '618');
+https://www.heungkukfire.co.kr/FRW/companyIntro/tender.do/javascript:frmView2('tender','258551', '617');
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1517076_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1517075_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1517074_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1517072_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1517070_115430.jsp
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=6881
+https://kbcapital.co.kr/custCenr/cmknMtrEvnt/cmknMtrList.kbc/javascript:goPageCmknMtrDtl('108012');
