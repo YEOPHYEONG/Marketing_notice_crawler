@@ -1612,3 +1612,6 @@ https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynam
 https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=6889
 https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=141676&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
 https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11888");
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1517278_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1517263_115430.jsp
+https://card.kbcard.com/SVC/DVIEW/HSEMCXCRSCTC0001/javascript:doView("11889");
