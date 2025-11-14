@@ -171,9 +171,10 @@ def handle_css_crawl(target, session):
     title_link_selector = target.get('title_link_selector')
     date_selector = target.get('date_selector')
     js_render = (target.get('js_render') or '').upper() == 'Y'
+    company = target.get('company', 'N/A')
 
     if not all([url, item_selector, title_link_selector]):
-        print(f"🟡 경고: '{target.get('company')}'의 url, item_selector 또는 title_link_selector가 비어있어 건너뜁니다.")
+        print(f"🟡 경고: '{company}'의 url, item_selector 또는 title_link_selector가 비어있어 건너뜁니다.")
         return []
 
     try:
@@ -187,31 +188,44 @@ def handle_css_crawl(target, session):
         response = session.get(url, headers=headers, timeout=20)
         response.raise_for_status()
 
-        # 흥국생명과 같은 EUC-KR 인코딩 사이트를 위해 인코딩을 수동으로 설정
+        # 1) 사이트별 인코딩 보정
         if 'heungkuklife' in url:
+            # 흥국생명: EUC-KR 강제
             response.encoding = 'EUC-KR'
-            print(f"ℹ️ '{target.get('company')}' 사이트의 인코딩을 EUC-KR로 설정했습니다.")
+            print(f"ℹ️ '{company}' 사이트의 인코딩을 EUC-KR로 설정했습니다.")
+        else:
+            # 기본 인코딩이 없거나 ISO-8859-1/latin-1인 경우, apparent_encoding으로 재설정
+            enc = (response.encoding or '').lower()
+            if enc in ('', 'iso-8859-1', 'latin-1'):
+                try:
+                    apparent = response.apparent_encoding
+                except Exception:
+                    apparent = None
+                if apparent:
+                    response.encoding = apparent
+                    print(f"ℹ️ '{company}' 사이트 인코딩 자동 감지: {apparent}")
 
+        # 2) JS 렌더링 여부에 따라 HTML 소스 선택
         if js_render:
-            print(f"ℹ️ '{target.get('company')}' 사이트는 JavaScript 렌더링을 사용합니다.")
+            print(f"ℹ️ '{company}' 사이트는 JavaScript 렌더링을 사용합니다.")
             response.html.render(sleep=3, timeout=20)  # 3초 대기하며 JS 렌더링
 
-        # JS 렌더링을 한 경우에는 렌더링된 HTML을, 아니면 응답 텍스트를 사용
         if js_render and hasattr(response, "html") and getattr(response.html, "html", None):
             html_source = response.html.html
         else:
+            # 인코딩이 위에서 보정된 상태이므로 text 사용
             html_source = response.text
 
         soup = BeautifulSoup(html_source, 'html.parser')
         items = soup.select(item_selector)
 
         if not items:
-            print(f"🟡 경고: '{target.get('company')}'에서 '{item_selector}' 선택자에 해당하는 항목을 찾지 못했습니다.")
+            print(f"🟡 경고: '{company}'에서 '{item_selector}' 선택자에 해당하는 항목을 찾지 못했습니다.")
             return []
 
         announcements = []
         for item in items:
-            # 1차 시도: 정의된 title_link_selector로 찾기
+            # 1차: 설정된 title_link_selector로 제목/링크 후보 찾기
             title_element = None
             if title_link_selector:
                 title_element = item.select_one(title_link_selector)
@@ -226,12 +240,26 @@ def handle_css_crawl(target, session):
                     if link_tag:
                         title_element = link_tag
 
-            # 어떤 방식으로도 제목/링크를 찾지 못하면 스킵
+            # 어떤 방식으로도 제목/링크 후보를 찾지 못하면 스킵
             if not title_element:
                 continue
 
-            title = title_element.get_text(strip=True)
+            # href 추출
             href = (title_element.get('href') or '').strip()
+
+            # 제목은 가능하면 h 태그에서만 추출 (pikk처럼 카드 전체 텍스트가 너무 많을 때)
+            title_tag = None
+            for tag_name in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+                t = item.find(tag_name)
+                if t:
+                    title_tag = t
+                    break
+
+            if title_tag:
+                title = title_tag.get_text(strip=True)
+            else:
+                # h 태그가 없으면 링크 요소 전체 텍스트 사용
+                title = title_element.get_text(strip=True)
 
             # href가 없거나 javascript 링크인 경우 onclick + link_format 사용
             if not href or 'javascript' in href.lower():
@@ -266,15 +294,14 @@ def handle_css_crawl(target, session):
         return announcements
 
     except requests.exceptions.Timeout:
-        print(f"❌ '{target.get('company')}' 사이트 접속 시간 초과.")
+        print(f"❌ '{company}' 사이트 접속 시간 초과.")
         return []
     except requests.RequestException as e:
-        print(f"❌ '{target.get('company')}' 사이트 접속 실패: {e}")
+        print(f"❌ '{company}' 사이트 접속 실패: {e}")
         return []
     except Exception as e:
-        print(f"❌ '{target.get('company')}' 처리 중 알 수 없는 오류: {e}")
+        print(f"❌ '{company}' 처리 중 알 수 없는 오류: {e}")
         return []
-
 
 
 def handle_api_crawl(target, session):
