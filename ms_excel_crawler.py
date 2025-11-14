@@ -165,8 +165,11 @@ def standardize_date(date_str):
 # --- 4. 크롤링 전략별 핸들러 ---
 def handle_css_crawl(target, session):
     """CSS 선택자 기반의 일반적인 웹사이트 크롤링을 처리합니다."""
-    url, base_url = target.get('url'), target.get('base_url', '')
-    item_selector, title_link_selector, date_selector = target.get('item_selector'), target.get('title_link_selector'), target.get('date_selector')
+    url = target.get('url')
+    base_url = target.get('base_url', '')
+    item_selector = target.get('item_selector')
+    title_link_selector = target.get('title_link_selector')
+    date_selector = target.get('date_selector')
     js_render = (target.get('js_render') or '').upper() == 'Y'
 
     if not all([url, item_selector, title_link_selector]):
@@ -174,36 +177,65 @@ def handle_css_crawl(target, session):
         return []
 
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+        headers = {
+            'User-Agent': (
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                'AppleWebKit/537.36 (KHTML, like Gecko) '
+                'Chrome/91.0.4472.124 Safari/537.36'
+            )
+        }
         response = session.get(url, headers=headers, timeout=20)
         response.raise_for_status()
 
-        # [수정] 흥국생명과 같은 EUC-KR 인코딩 사이트를 위해 인코딩을 수동으로 설정
+        # 흥국생명과 같은 EUC-KR 인코딩 사이트를 위해 인코딩을 수동으로 설정
         if 'heungkuklife' in url:
             response.encoding = 'EUC-KR'
             print(f"ℹ️ '{target.get('company')}' 사이트의 인코딩을 EUC-KR로 설정했습니다.")
 
         if js_render:
             print(f"ℹ️ '{target.get('company')}' 사이트는 JavaScript 렌더링을 사용합니다.")
-            response.html.render(sleep=3, timeout=20) # 3초 대기하며 JS 렌더링
-        
-        soup = BeautifulSoup(response.html.html, 'html.parser')
+            response.html.render(sleep=3, timeout=20)  # 3초 대기하며 JS 렌더링
+
+        # JS 렌더링을 한 경우에는 렌더링된 HTML을, 아니면 응답 텍스트를 사용
+        if js_render and hasattr(response, "html") and getattr(response.html, "html", None):
+            html_source = response.html.html
+        else:
+            html_source = response.text
+
+        soup = BeautifulSoup(html_source, 'html.parser')
         items = soup.select(item_selector)
 
         if not items:
             print(f"🟡 경고: '{target.get('company')}'에서 '{item_selector}' 선택자에 해당하는 항목을 찾지 못했습니다.")
             return []
-            
+
         announcements = []
         for item in items:
-            title_element = item.select_one(title_link_selector)
-            if not title_element: continue
-            
+            # 1차 시도: 정의된 title_link_selector로 찾기
+            title_element = None
+            if title_link_selector:
+                title_element = item.select_one(title_link_selector)
+
+            # 2차 fallback: item 자체가 <a href="..."> 인 경우
+            if not title_element:
+                if item.name == 'a' and item.get('href'):
+                    title_element = item
+                else:
+                    # 3차 fallback: item 내부의 첫 번째 <a href=...> 사용
+                    link_tag = item.find('a', href=True)
+                    if link_tag:
+                        title_element = link_tag
+
+            # 어떤 방식으로도 제목/링크를 찾지 못하면 스킵
+            if not title_element:
+                continue
+
             title = title_element.get_text(strip=True)
-            href = title_element.get('href', '')
-            
+            href = (title_element.get('href') or '').strip()
+
+            # href가 없거나 javascript 링크인 경우 onclick + link_format 사용
             if not href or 'javascript' in href.lower():
-                onclick_attr = title_element.get('onclick', '')
+                onclick_attr = (title_element.get('onclick') or '').strip()
                 if onclick_attr:
                     match = re.search(r"[(']([^()']+)[')]", onclick_attr)
                     if match:
@@ -212,16 +244,24 @@ def handle_css_crawl(target, session):
                         if link_format:
                             href = link_format.replace('{id}', link_part)
 
+            # 날짜 파싱
             post_date = "N/A"
             if date_selector:
                 date_element = item.select_one(date_selector)
-                if date_element: post_date = standardize_date(date_element.get_text(strip=True))
-            
+                if date_element:
+                    post_date = standardize_date(date_element.get_text(strip=True))
+
+            # 상대경로 링크를 절대경로로 변환
             if href and not href.startswith('http'):
                 href = (base_url or url).rstrip('/') + '/' + href.lstrip('/')
-            
+
+            # 제목과 링크가 모두 있는 경우에만 기록
             if href and title:
-                announcements.append({"title": title, "href": href, "date": post_date})
+                announcements.append({
+                    "title": title,
+                    "href": href,
+                    "date": post_date
+                })
 
         return announcements
 
@@ -234,6 +274,7 @@ def handle_css_crawl(target, session):
     except Exception as e:
         print(f"❌ '{target.get('company')}' 처리 중 알 수 없는 오류: {e}")
         return []
+
 
 
 def handle_api_crawl(target, session):
