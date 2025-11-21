@@ -1715,3 +1715,94 @@ https://pikk.co.kr/bids?page=1/bid/133
 https://pikk.co.kr/bids?page=1/bid/132
 https://pikk.co.kr/bids?page=1/bid/131
 https://pikk.co.kr/bids?page=1/bid/130
+javascript:goViewPage("128");
+javascript:goViewPage("127");
+javascript:goViewPage("122");
+javascript:goViewPage("121");
+javascript:goViewPage("119");
+javascript:goViewPage("118");
+javascript:goViewPage("117");
+javascript:goViewPage("116");
+javascript:goViewPage("115");
+javascript:goViewPage("114");
+https://www.heungkuklife.co.kr/front/company/tenderList.do/front/company/boardView.do?brd_num_seq=7385&rnum=465&p_no=1
+javascript:frmView2('tender','259105', '619');
+javascript:frmView2('tender','258890', '618');
+javascript:frmView2('tender','258551', '617');
+javascript:frmView2('tender','258425', '616');
+javascript:frmView2('tender','258108', '615');
+javascript:frmView2('tender','257846', '614');
+javascript:frmView2('tender','257260', '613');
+javascript:frmView2('tender','257009', '612');
+javascript:frmView2('tender','255844', '611');
+javascript:frmView2('tender','255444', '610');
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=986
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=985
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=984
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=981
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=980
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=979
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=976
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=974
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=973
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=971
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=970
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=969
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=968
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=967
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=961
+https://spot.wooribank.com/{base_url}/pot/Dream?withyou=BPPBC0011&bbsMode=view&boardId=B00072&articleId=this,
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20251121?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=1
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20251120?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=2
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20251118?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=3
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20251021?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=4
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20251013?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=5
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250924?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=6
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250922?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=7
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250919?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=8
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250822?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=9
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20250820?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=10
+javascript:void(0);
+javascript:doView("9609");
+javascript:doView("9976");
+javascript:doView("10519");
+javascript:doView("11650");
+javascript:doView("11913");
+javascript:doView("11912");
+javascript:doView("11911");
+javascript:doView("11910");
+javascript:doView("11909");
+javascript:doView("11900");
+javascript:doView("11899");
+javascript:doView("11898");
+javascript:doView("11891");
+javascript:doView("11889");
+javascript:goPageCmknMtrDtl('108039');
+javascript:goPageCmknMtrDtl('108037');
+javascript:goPageCmknMtrDtl('108012');
+javascript:goPageCmknMtrDtl('107952');
+javascript:goPageCmknMtrDtl('107942');
+javascript:goPageCmknMtrDtl('107941');
+javascript:goPageCmknMtrDtl('107940');
+javascript:goPageCmknMtrDtl('107764');
+javascript:goPageCmknMtrDtl('107750');
+javascript:goPageCmknMtrDtl('107265');
+https://pikk.co.kr/bids?page=1/bid/149
+https://pikk.co.kr/bids?page=1/bid/148
+https://pikk.co.kr/bids?page=1/bid/147
+https://pikk.co.kr/bids?page=1/bid/146
+https://pikk.co.kr/bids?page=1/bid/145
+https://pikk.co.kr/bids?page=1/bid/144
+https://pikk.co.kr/bids?page=1/bid/143
+https://pikk.co.kr/bids?page=1/bid/142
+https://pikk.co.kr/bids?page=1/bid/141
+https://www.kakaobank.com/Corp/News/Bidding/view/17834
+https://www.kakaobank.com/Corp/News/Bidding/view/17824
+https://www.kakaobank.com/Corp/News/Bidding/view/17766
+https://www.kakaobank.com/Corp/News/Bidding/view/17736
+https://www.kakaobank.com/Corp/News/Bidding/view/17727
+https://www.kakaobank.com/Corp/News/Bidding/view/17726
+https://www.kakaobank.com/Corp/News/Bidding/view/17677
+https://www.kakaobank.com/Corp/News/Bidding/view/17629
+https://www.kakaobank.com/Corp/News/Bidding/view/17621
+https://www.kakaobank.com/Corp/News/Bidding/view/17602
