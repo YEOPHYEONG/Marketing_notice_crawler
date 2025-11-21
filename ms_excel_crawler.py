@@ -163,6 +163,8 @@ def standardize_date(date_str):
         return date_str # 파싱 실패 시 원본 반환
 
 # --- 4. 크롤링 전략별 핸들러 ---
+# ms_excel_crawler.py 파일의 handle_css_crawl 함수를 아래 내용으로 덮어쓰세요.
+
 def handle_css_crawl(target, session):
     """CSS 선택자 기반의 일반적인 웹사이트 크롤링을 처리합니다."""
     url = target.get('url')
@@ -186,26 +188,22 @@ def handle_css_crawl(target, session):
                 'Chrome/91.0.4472.124 Safari/537.36'
             )
         }
-        # ★ 요청 방식은 미래에셋이 잘 되던 코드와 동일하게 유지
+        
         response = session.get(url, headers=headers, timeout=20)
         response.raise_for_status()
 
-        # --- 인코딩 보정 (사이트별 최소 보정만) ---
-        # 1) 흥국생명: EUC-KR 강제
+        # --- 인코딩 보정 ---
         if 'heungkuklife' in url:
             response.encoding = 'EUC-KR'
             print(f"ℹ️ '{company}' 사이트의 인코딩을 EUC-KR로 설정했습니다.")
-        # 2) pikk: UTF-8 강제 (모지바케 방지용)
         elif 'pikk.co.kr' in url:
-            # 서버에서 인코딩을 제대로 안 내려줄 때 latin-1로 잡히는 문제를 방지
             response.encoding = 'utf-8'
             print(f"ℹ️ '{company}' 사이트의 인코딩을 UTF-8로 설정했습니다.")
 
         if js_render:
             print(f"ℹ️ '{company}' 사이트는 JavaScript 렌더링을 사용합니다.")
-            response.html.render(sleep=3, timeout=20)  # 3초 대기하며 JS 렌더링
+            response.html.render(sleep=3, timeout=20)
 
-        # JS 렌더링을 한 경우에는 렌더링된 HTML을, 아니면 응답 텍스트를 사용
         if js_render and hasattr(response, "html") and getattr(response.html, "html", None):
             html_source = response.html.html
         else:
@@ -235,14 +233,12 @@ def handle_css_crawl(target, session):
                     if link_tag:
                         title_element = link_tag
 
-            # 어떤 방식으로도 제목/링크를 찾지 못하면 스킵
             if not title_element:
                 continue
 
             href = (title_element.get('href') or '').strip()
 
             # --- 제목 추출 ---
-            # pikk의 경우: 카드 안의 <h3>만 제목으로 사용 (기관명/마감일 텍스트 제외)
             if 'pikk.co.kr' in url:
                 title_tag = item.find('h3')
                 if title_tag:
@@ -250,19 +246,30 @@ def handle_css_crawl(target, session):
                 else:
                     title = title_element.get_text(strip=True)
             else:
-                # 기존 사이트들은 예전 방식 그대로 유지
                 title = title_element.get_text(strip=True)
 
-            # href가 없거나 javascript 링크인 경우 onclick + link_format 사용
-            if not href or 'javascript' in href.lower():
-                onclick_attr = (title_element.get('onclick') or '').strip()
-                if onclick_attr:
-                    match = re.search(r"[(']([^()']+)[')]", onclick_attr)
-                    if match:
-                        link_part = match.group(1)
-                        link_format = target.get('link_format')
-                        if link_format:
-                            href = link_format.replace('{id}', link_part)
+            # --- [수정된 부분] 링크 추출 로직 강화 ---
+            # href가 없거나, javascript, 또는 # 링크인 경우 대체 속성(data-key, onclick) 확인
+            if not href or 'javascript' in href.lower() or href == '#':
+                link_format = target.get('link_format')
+                
+                # 1. data-key 속성 확인 (신한라이프 등 신규 패턴)
+                # 기존 사이트에는 이 속성이 없으므로 영향 없음
+                data_key = title_element.attrs.get('data-key')
+                
+                if data_key and link_format:
+                    href = link_format.replace('{id}', str(data_key).strip())
+                
+                # 2. onclick 속성 확인 (기존 패턴 - 미래에셋, 롯데손보 등)
+                # data-key가 없을 때만 실행되므로 안전함
+                else:
+                    onclick_attr = (title_element.get('onclick') or '').strip()
+                    if onclick_attr:
+                        match = re.search(r"[(']([^()']+)[')]", onclick_attr)
+                        if match:
+                            link_part = match.group(1)
+                            if link_format:
+                                href = link_format.replace('{id}', link_part)
 
             # 날짜 파싱
             post_date = "N/A"
@@ -272,10 +279,9 @@ def handle_css_crawl(target, session):
                     post_date = standardize_date(date_element.get_text(strip=True))
 
             # 상대경로 링크를 절대경로로 변환
-            if href and not href.startswith('http'):
+            if href and not href.startswith('http') and not href.startswith('javascript'):
                 href = (base_url or url).rstrip('/') + '/' + href.lstrip('/')
 
-            # 제목과 링크가 모두 있는 경우에만 기록
             if href and title:
                 announcements.append({
                     "title": title,
@@ -294,7 +300,6 @@ def handle_css_crawl(target, session):
     except Exception as e:
         print(f"❌ '{company}' 처리 중 알 수 없는 오류: {e}")
         return []
-
 
 def handle_api_crawl(target, session):
     """JSON API 기반의 크롤링을 처리합니다."""
