@@ -163,8 +163,6 @@ def standardize_date(date_str):
         return date_str # 파싱 실패 시 원본 반환
 
 # --- 4. 크롤링 전략별 핸들러 ---
-# ms_excel_crawler.py 파일의 handle_css_crawl 함수를 아래 내용으로 덮어쓰세요.
-
 def handle_css_crawl(target, session):
     """CSS 선택자 기반의 일반적인 웹사이트 크롤링을 처리합니다."""
     url = target.get('url')
@@ -248,24 +246,27 @@ def handle_css_crawl(target, session):
             else:
                 title = title_element.get_text(strip=True)
 
-            # --- [수정된 부분] 링크 추출 로직 강화 ---
-            # href가 없거나, javascript, 또는 # 링크인 경우 대체 속성(data-key, onclick) 확인
+            # --- [수정된 부분] 링크 추출 로직 완성형 (data-key, href=javascript, onclick 모두 지원) ---
+            # href가 없거나, javascript, 또는 # 링크인 경우 대체 속성 확인
             if not href or 'javascript' in href.lower() or href == '#':
                 link_format = target.get('link_format')
                 
-                # 1. data-key 속성 확인 (신한라이프 등 신규 패턴)
-                # 기존 사이트에는 이 속성이 없으므로 영향 없음
+                # 1. data-key 속성 확인 (신한라이프 등)
                 data_key = title_element.attrs.get('data-key')
                 
                 if data_key and link_format:
                     href = link_format.replace('{id}', str(data_key).strip())
                 
-                # 2. onclick 속성 확인 (기존 패턴 - 미래에셋, 롯데손보 등)
-                # data-key가 없을 때만 실행되므로 안전함
+                # 2. 자바스크립트(onclick 또는 href)에서 ID 추출 (삼양그룹, 미래에셋 등)
                 else:
-                    onclick_attr = (title_element.get('onclick') or '').strip()
-                    if onclick_attr:
-                        match = re.search(r"[(']([^()']+)[')]", onclick_attr)
+                    # onclick 값을 먼저 가져오고, 없으면 href 값이 'javascript:'로 시작하는지 확인
+                    js_code = (title_element.get('onclick') or '').strip()
+                    if not js_code and href.lower().startswith('javascript:'):
+                        js_code = href
+                    
+                    # 정규식으로 괄호 안의 숫자나 문자열 추출 (예: goView(11453) -> 11453)
+                    if js_code:
+                        match = re.search(r"[(']([^()']+)[')]", js_code)
                         if match:
                             link_part = match.group(1)
                             if link_format:
