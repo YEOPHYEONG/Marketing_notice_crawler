@@ -3956,3 +3956,14 @@ https://pikk.co.kr/bids?page=1/bid/387
 https://pikk.co.kr/bids?page=1/bid/386
 https://www.kakaobank.com/Corp/News/Bidding/view/18149
 https://www.kakaobank.com/Corp/News/Bidding/view/18148
+javascript:frmView2('tender','262401', '622');
+javascript:doView("11940");
+https://pikk.co.kr/bids?page=1/bid/408
+https://pikk.co.kr/bids?page=1/bid/407
+https://pikk.co.kr/bids?page=1/bid/406
+https://pikk.co.kr/bids?page=1/bid/405
+https://pikk.co.kr/bids?page=1/bid/404
+https://pikk.co.kr/bids?page=1/bid/403
+https://pikk.co.kr/bids?page=1/bid/402
+https://pikk.co.kr/bids?page=1/bid/401
+https://pikk.co.kr/bids?page=1/bid/400
