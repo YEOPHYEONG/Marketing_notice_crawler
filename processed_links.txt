@@ -4985,3 +4985,15 @@ https://pikk.co.kr/bids?page=1/bid/573
 https://pikk.co.kr/bids?page=1/bid/572
 https://pikk.co.kr/bids?page=1/bid/571
 https://www.samyang.com/kr/media/newsroom/view?idx=11470
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=142592&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1522046_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1522045_115430.jsp
+https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13324&page=1
+https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20260105&seqno=8859&gubun=14&pageNum=1&searchGubun=0
+javascript:doView("11959");
+javascript:goPageCmknMtrDtl('108186');
+https://pikk.co.kr/bids?page=1/bid/582
+https://pikk.co.kr/bids?page=1/bid/581
+https://pikk.co.kr/bids?page=1/bid/580
+https://pikk.co.kr/bids?page=1/bid/579
+https://www.samyang.com/kr/media/newsroom/view?idx=11471
