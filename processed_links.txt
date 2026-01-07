@@ -5021,3 +5021,16 @@ https://pikk.co.kr/bids?page=1/bid/601
 https://pikk.co.kr/bids?page=1/bid/600
 https://pikk.co.kr/bids?page=1/bid/599
 https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=2714d1e3b66b4602b8bb
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1005
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1522088_115430.jsp
+https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13325&page=1
+https://corp.skylife.co.kr/pr/notice_list.do?page=1&searchColumn=&searchString=&searchSelect=/pr/notice_view.do?pk_bbs=22244&page=1&searchColumn=&searchString=&searchSelect=
+https://pikk.co.kr/bids?page=1/bid/628
+https://pikk.co.kr/bids?page=1/bid/627
+https://pikk.co.kr/bids?page=1/bid/626
+https://pikk.co.kr/bids?page=1/bid/625
+https://pikk.co.kr/bids?page=1/bid/624
+https://pikk.co.kr/bids?page=1/bid/623
+https://pikk.co.kr/bids?page=1/bid/622
+https://pikk.co.kr/bids?page=1/bid/621
+https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=44c337eebfd847feb0ae
