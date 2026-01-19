@@ -5982,3 +5982,13 @@ https://pikk.co.kr/bids?page=1/bid/798
 https://pikk.co.kr/bids?page=1/bid/797
 https://pikk.co.kr/bids?page=1/bid/796
 https://pikk.co.kr/bids?page=1/bid/795
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=142741&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1008
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1007
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1006
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1522390_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1522389_115430.jsp
+https://pikk.co.kr/bids?page=1/bid/805
+https://pikk.co.kr/bids?page=1/bid/804
+https://pikk.co.kr/bids?page=1/bid/803
+https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=3b3776c989de41fdba6a
