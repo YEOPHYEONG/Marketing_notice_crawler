@@ -6529,3 +6529,4 @@ https://pikk.co.kr/bids?page=1/bid/1034
 https://pikk.co.kr/bids?page=1/bid/1033
 https://pikk.co.kr/bids?page=1/bid/1032
 https://pikk.co.kr/bids?page=1/bid/1031
+javascript:goPageCmknMtrDtl('107212');
