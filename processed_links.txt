@@ -6555,3 +6555,5 @@ https://pikk.co.kr/bids?page=1/bid/1092
 https://pikk.co.kr/bids?page=1/bid/1091
 https://pikk.co.kr/bids?page=1/bid/1090
 https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=da51295d44774d6db257
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=142985&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://www.samyang.com/kr/media/newsroom/view?idx=11502
