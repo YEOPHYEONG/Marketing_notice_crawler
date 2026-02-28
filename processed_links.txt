@@ -9322,3 +9322,4 @@ https://pikk.co.kr/bids?page=1/bid/1474
 https://pikk.co.kr/bids?page=1/bid/1473
 https://pikk.co.kr/bids?page=1/bid/1472
 https://pikk.co.kr/bids?page=1/bid/1471
+javascript:goPageCmknMtrDtl('107100');
