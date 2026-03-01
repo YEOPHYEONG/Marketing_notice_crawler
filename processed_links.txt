@@ -9323,3 +9323,11 @@ https://pikk.co.kr/bids?page=1/bid/1473
 https://pikk.co.kr/bids?page=1/bid/1472
 https://pikk.co.kr/bids?page=1/bid/1471
 javascript:goPageCmknMtrDtl('107100');
+https://pikk.co.kr/bids?page=1/bid/1498
+https://pikk.co.kr/bids?page=1/bid/1497
+https://pikk.co.kr/bids?page=1/bid/1496
+https://pikk.co.kr/bids?page=1/bid/1495
+https://pikk.co.kr/bids?page=1/bid/1494
+https://pikk.co.kr/bids?page=1/bid/1493
+https://pikk.co.kr/bids?page=1/bid/1492
+https://pikk.co.kr/bids?page=1/bid/1491
