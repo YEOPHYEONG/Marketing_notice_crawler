@@ -9331,3 +9331,15 @@ https://pikk.co.kr/bids?page=1/bid/1494
 https://pikk.co.kr/bids?page=1/bid/1493
 https://pikk.co.kr/bids?page=1/bid/1492
 https://pikk.co.kr/bids?page=1/bid/1491
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=143356&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+javascript:frmView2('tender','269005', '634');
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1524156_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1524141_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1524092_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1524109_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1524146_115430.jsp
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7084
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7082
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7081
+javascript:doView("12039");
+https://pikk.co.kr/bids?page=1/bid/1499
