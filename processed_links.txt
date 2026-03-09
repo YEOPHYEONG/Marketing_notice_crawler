@@ -9821,3 +9821,13 @@ https://pikk.co.kr/bids?page=1/bid/1588
 https://pikk.co.kr/bids?page=1/bid/1587
 https://pikk.co.kr/bids?page=1/bid/1586
 https://pikk.co.kr/bids?page=1/bid/1585
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=143400&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7097
+javascript:doView("12047");
+javascript:doView("12046");
+javascript:doView("12045");
+javascript:doView("12044");
+javascript:doView("12043");
+javascript:goPageCmknMtrDtl('108327');
+https://pikk.co.kr/bids?page=1/bid/1594
+https://pikk.co.kr/bids?page=1/bid/1593
