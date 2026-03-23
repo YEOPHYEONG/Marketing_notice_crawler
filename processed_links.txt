@@ -11684,3 +11684,10 @@ https://pikk.co.kr/bids?page=1/bid/1815
 https://pikk.co.kr/bids?page=1/bid/1814
 https://pikk.co.kr/bids?page=1/bid/1813
 https://pikk.co.kr/bids?page=1/bid/1812
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=143620&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://www.heungkuklife.co.kr/front/company/tenderList.do/front/company/boardView.do?brd_num_seq=7516&rnum=476&p_no=1
+https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13341&page=1
+javascript:doView("12075");
+javascript:doView("12072");
+javascript:goPageCmknMtrDtl('108374');
+https://pikk.co.kr/bids?page=1/bid/1820
