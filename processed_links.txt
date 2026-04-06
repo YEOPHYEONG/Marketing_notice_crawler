@@ -12721,3 +12721,14 @@ https://pikk.co.kr/bids?page=1/bid/2055
 https://pikk.co.kr/bids?page=1/bid/2054
 https://pikk.co.kr/bids?page=1/bid/2053
 https://link.coupang.com/re/AFFSDP?lptag=AF2697994&pageKey=6979534638&itemId=15078790606&vendorItemId=82300980388&traceid=V0-143-fcc756c5ba033147
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=143932&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=143923&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=143921&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+javascript:goViewPage("142");
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1023
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1524894_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1524893_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1524884_115430.jsp
+javascript:doView("12112");
+https://link.coupang.com/re/AFFSDP?lptag=AF2697994&pageKey=8527026341&itemId=13943618577&vendorItemId=81192884825&traceid=V0-143-610d7b98728bca79
+https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=b869927bd86e424b91fb
