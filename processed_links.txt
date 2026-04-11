@@ -13240,3 +13240,4 @@ https://pikk.co.kr/bids?page=1/bid/2146
 https://pikk.co.kr/bids?page=1/bid/2145
 https://pikk.co.kr/bids?page=1/bid/2144
 https://link.coupang.com/re/AFFSDP?lptag=AF2697994&pageKey=7398402281&itemId=21401410806&vendorItemId=88458027992&traceid=V0-113-18858809f4b320e4
+https://link.coupang.com/re/AFFSDP?lptag=AF2697994&pageKey=7022353211&itemId=23860055124&vendorItemId=73191776348&traceid=V0-113-c3f094ea0de9f0fd
