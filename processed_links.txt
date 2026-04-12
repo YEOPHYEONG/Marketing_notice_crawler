@@ -13242,3 +13242,4 @@ https://pikk.co.kr/bids?page=1/bid/2144
 https://link.coupang.com/re/AFFSDP?lptag=AF2697994&pageKey=7398402281&itemId=21401410806&vendorItemId=88458027992&traceid=V0-113-18858809f4b320e4
 https://link.coupang.com/re/AFFSDP?lptag=AF2697994&pageKey=7022353211&itemId=23860055124&vendorItemId=73191776348&traceid=V0-113-c3f094ea0de9f0fd
 https://link.coupang.com/re/AFFSDP?lptag=AF2697994&pageKey=6380289545&itemId=13947244364&vendorItemId=80806377344&traceid=V0-113-ded8ef139fb984f2
+https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20260413&seqno=8904&gubun=14&pageNum=1&searchGubun=0
