@@ -13252,3 +13252,9 @@ https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiI
 https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7163
 javascript:doView("12119");
 javascript:doView("12118");
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525034_115430.jsp
+javascript:doView("12123");
+javascript:doView("12122");
+javascript:doView("12121");
+javascript:doView("12120");
+javascript:goPageCmknMtrDtl('108469');
