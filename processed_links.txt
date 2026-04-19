@@ -13715,3 +13715,4 @@ https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news0
 https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13349&page=1
 javascript:doView("12128");
 https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=419f417efce247b49038
+https://investments.miraeasset.com/magi/board/news/list.do?boardCode=1&menuId=/magi/board/news/view.do?id=16617&boardCode=1
