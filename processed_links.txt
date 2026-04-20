@@ -13716,3 +13716,13 @@ https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiI
 javascript:doView("12128");
 https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=419f417efce247b49038
 https://investments.miraeasset.com/magi/board/news/list.do?boardCode=1&menuId=/magi/board/news/view.do?id=16617&boardCode=1
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=144137&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+javascript:goViewPage("148");
+javascript:goViewPage("147");
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525165_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525164_115430.jsp
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7178
+javascript:doView("12134");
+javascript:doView("12133");
+javascript:doView("12132");
+https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=21cbe9aec63a473c914a
