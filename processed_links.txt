@@ -14163,3 +14163,6 @@ https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynam
 https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=88645c5756374d7ca2c0
 https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=01f2f1a0046c41ca8f56
 https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=16e372e660d74db5a3c1
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525198_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525197_115430.jsp
+javascript:goPageCmknMtrDtl('108480');
