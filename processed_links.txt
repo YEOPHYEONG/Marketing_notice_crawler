@@ -14166,3 +14166,8 @@ https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=16e372e660d74db5
 https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525198_115430.jsp
 https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525197_115430.jsp
 javascript:goPageCmknMtrDtl('108480');
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525217_115430.jsp
+javascript:doView("12148");
+https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=1a5af9e022c745bab59e
+https://www.samyang.com/kr/media/newsroom/view?idx=11532
+https://www.samyang.com/kr/media/newsroom/view?idx=11529
