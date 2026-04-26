@@ -14189,3 +14189,4 @@ https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=al
 https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13350&page=1
 https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7190
 javascript:doView("12149");
+https://www.samyang.com/kr/media/newsroom/view?idx=11533
