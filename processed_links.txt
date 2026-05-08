@@ -14670,3 +14670,17 @@ https://www.idbins.com/pc/bizxpress/contentTemplet/cmy/pr/an/list.jsp?tp=T&tx=&c
 https://www.idbins.com/pc/bizxpress/contentTemplet/cmy/pr/an/list.jsp?tp=T&tx=&ct=1/pc/bizxpress/cmy/pr/an/FMCOMV1800_260417(2).shtm?tp=T&tx=&ct=5
 javascript:goViewPage("151");
 javascript:doView("12166");
+javascript:goViewPage("152");
+javascript:frmView2('tender','273420', '640');
+https://www.hyundaihmall.com/md/cia/selectBbsDtl?bbsId=54431&ancmBbsGbcd=16&bbsNo=94
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525467_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525472_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525471_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525464_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525463_115430.jsp
+https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13355&page=1
+https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20260508&seqno=8990&gubun=14&pageNum=1&searchGubun=0
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7217
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7216
+javascript:doView("12167");
+https://www.samyang.com/kr/media/newsroom/view?idx=11546
