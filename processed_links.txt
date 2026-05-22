@@ -16924,3 +16924,11 @@ javascript:doView("12187");
 javascript:goPageCmknMtrDtl('108563');
 https://www.shinhanlife.co.kr/hp/입찰공시_상세_URL.do?key=514356f5c2b947bb805f
 https://www.samyang.com/kr/media/newsroom/view?idx=11555
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=144683&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=144682&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525769_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525745_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525760_115430.jsp
+https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20260522&seqno=9003&gubun=14&pageNum=1&searchGubun=0
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7239
+javascript:goPageCmknMtrDtl('108567');
