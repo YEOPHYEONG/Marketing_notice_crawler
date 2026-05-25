@@ -16932,3 +16932,4 @@ https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news0
 https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20260522&seqno=9003&gubun=14&pageNum=1&searchGubun=0
 https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7239
 javascript:goPageCmknMtrDtl('108567');
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7240
