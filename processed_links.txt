@@ -16933,3 +16933,11 @@ https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20260522&s
 https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7239
 javascript:goPageCmknMtrDtl('108567');
 https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7240
+https://www.heungkuklife.co.kr/front/company/tenderList.do/front/company/boardView.do?brd_num_seq=7583&rnum=483&p_no=1
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1028
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525797_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525796_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525795_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525794_115430.jsp
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7243
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7242
