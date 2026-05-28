@@ -16948,3 +16948,16 @@ https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20260527&s
 https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7250
 https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7247
 javascript:goPageCmknMtrDtl('108568');
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=144767&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=144710&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=144766&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525846_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525840_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525833_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525832_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525811_115430.jsp
+https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13361&page=1
+https://www.hyundai.com/kr/ko/digital-customer-support/notice/notice/detail?pwiImtrSn=13360&page=1
+https://iprovest.com/weblogic/CINRServlet?scr_id=1399&mode=detail&ymd=20260528&seqno=9005&gubun=14&pageNum=1&searchGubun=0
+javascript:doView("12193");
+javascript:doView("12192");
