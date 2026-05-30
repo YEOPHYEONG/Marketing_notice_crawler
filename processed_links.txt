@@ -16975,3 +16975,5 @@ javascript:doView("12195");
 javascript:doView("12194");
 https://www.samyang.com/kr/media/newsroom/view?idx=11557
 https://www.samyang.com/kr/media/newsroom/view?idx=11556
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1035
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1034
