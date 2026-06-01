@@ -16977,3 +16977,25 @@ https://www.samyang.com/kr/media/newsroom/view?idx=11557
 https://www.samyang.com/kr/media/newsroom/view?idx=11556
 https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1035
 https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1034
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=144797&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+https://omoney.kbstar.com/quics?page=C018592/quics?page=C018592&boardId=648&compId=b031439&articleId=144739&bbsMode=view&viewPage=1&articleClass=&searchCondition=title&searchStr=
+javascript:frmView2('tender','275377', '646');
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1036
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525902_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525901_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525900_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525899_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525898_115430.jsp
+https://www.kebhana.com/cont/news/news01/index.jsp?_menuNo=98853/cont/news/news01/1525871_115430.jsp
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-202606010?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=1
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20260601?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=2
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20260518?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=3
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-202605180?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=4
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20260427?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=5
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20260424?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=6
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20260410?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=7
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20260403?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=8
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20260325?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=9
+https://www.kia.com/kr/customer-service/notice?q=%EC%97%85%EC%B2%B4&searchTag=all/kr/customer-service/notice/notice-20260320?q=업체&searchTag=all&currentPage=1&indexSize=10&itemId=10
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7261
+javascript:doView("12199");
