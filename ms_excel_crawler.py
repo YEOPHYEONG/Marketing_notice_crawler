@@ -236,6 +236,11 @@ def handle_css_crawl(target, session):
 
             href = (title_element.get('href') or '').strip()
 
+            if not href:
+                parent_a = title_element.find_parent('a', href=True)
+                if parent_a:
+                    href = parent_a.get('href').strip()
+
             # --- 제목 추출 ---
             if 'pikk.co.kr' in url:
                 title_tag = item.find('h3')
