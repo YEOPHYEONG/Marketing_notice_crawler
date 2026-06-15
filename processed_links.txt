@@ -17612,3 +17612,16 @@ https://www.pikk.co.kr/bid/3176
 https://www.pikk.co.kr/bid/3175
 https://www.pikk.co.kr/bid/3174
 https://www.pikk.co.kr/bid/3173
+https://www.nhnetworks.co.kr/{base_url}/cs/notice_detail.do?boardSeq=1037
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7293
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7292
+https://www.kakaopaysec.com/customer/notice/dynamicPage.do/customer/notice/dynamicBoardPageDetail.do?id=7291
+javascript:doView("12215");
+https://www.pikk.co.kr/bid/3199
+https://www.pikk.co.kr/bid/3198
+https://www.pikk.co.kr/bid/3197
+https://www.pikk.co.kr/bid/3196
+https://www.pikk.co.kr/bid/3195
+https://www.pikk.co.kr/bid/3194
+https://www.pikk.co.kr/bid/3193
+https://www.pikk.co.kr/bid/3192
